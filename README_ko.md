@@ -76,6 +76,31 @@ npm run package:dir    # 언팩 디렉터리만 (빠른 검증, 서명 X)
 - macOS: `CSC_LINK`, `CSC_KEY_PASSWORD`, 공증을 위해 `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`
 - Windows: 코드 서명 인증서를 위한 `CSC_LINK`, `CSC_KEY_PASSWORD`
 
+### 릴리즈
+
+```bash
+npm run release          # interactive: bump 종류 선택 → verify → tag → push
+npm run release:patch    # 0.1.0 → 0.1.1
+npm run release:minor    # 0.1.0 → 0.2.0
+npm run release:major    # 0.1.0 → 1.0.0
+node scripts/release.mjs 0.2.0-beta.1   # 명시 semver (자유 문자열)
+```
+
+스크립트는 항상:
+
+1. 작업 트리가 깨끗하지 않으면 거부 (먼저 commit/stash 필요).
+2. 단축 변형(`patch`/`minor`/`major`)은 bump prompt를 건너뛰고, 그 외엔 묻습니다.
+3. 5단계 계획을 표시하고 **최종 confirm**(필수 prompt)을 받습니다.
+4. `npm run verify` 실행 (lint + typecheck + 단위/통합 테스트).
+5. `npm version`으로 `package.json` 버전 bump + `vX.Y.Z` 태그 생성.
+6. 브랜치 + 태그를 `origin`에 push.
+
+이후 GitHub Actions (`.github/workflows/release.yml`)가 받아서:
+
+- macOS (arm64 + x64), Windows (x64), Linux (x64) 매트릭스 빌드.
+- 해당 secrets가 있으면 서명, 없으면 unsigned로 생성.
+- 모든 인스톨러를 첨부한 **Draft Release**를 자동 생성. 노트 작성 후 수동으로 Publish.
+
 자세한 구현 단계는 [docs/implementation-checklist.md](docs/implementation-checklist.md)를 참고하세요.
 
 ## 라이선스

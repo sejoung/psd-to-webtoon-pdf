@@ -76,6 +76,31 @@ Code signing for distribution requires environment variables:
 - macOS: `CSC_LINK`, `CSC_KEY_PASSWORD`, plus `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` for notarization.
 - Windows: `CSC_LINK` and `CSC_KEY_PASSWORD` for an Authenticode certificate.
 
+### Release
+
+```bash
+npm run release          # interactive: choose bump → verify → tag → push
+npm run release:patch    # 0.1.0 → 0.1.1
+npm run release:minor    # 0.1.0 → 0.2.0
+npm run release:major    # 0.1.0 → 1.0.0
+node scripts/release.mjs 0.2.0-beta.1   # explicit semver (any string accepted)
+```
+
+The script always:
+
+1. Refuses to run on a dirty working tree.
+2. With shortcut variants (`patch`/`minor`/`major`), skips bump prompt; otherwise asks.
+3. Shows the 5-step plan and asks for **final confirmation** (the only mandatory prompt).
+4. Runs `npm run verify` (lint + typecheck + unit + integration tests).
+5. `npm version` bumps `package.json` and creates the `vX.Y.Z` tag.
+6. Pushes branch + tag to `origin`.
+
+GitHub Actions (`.github/workflows/release.yml`) then takes over:
+
+- Matrix builds on macOS (arm64 + x64), Windows (x64), Linux (x64).
+- Signs only if the relevant secrets are set; otherwise produces unsigned artifacts.
+- Creates a **Draft Release** with all installers attached. Add release notes and Publish manually.
+
 See [docs/implementation-checklist.md](docs/implementation-checklist.md) for the step-by-step build plan.
 
 한국어 README는 [README_ko.md](README_ko.md)를 참고하세요.

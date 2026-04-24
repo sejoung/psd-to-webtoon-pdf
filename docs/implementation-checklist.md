@@ -307,7 +307,7 @@
 
 ### 9.3 첫 릴리스
 - [x] GitHub Actions: lint / typecheck / unit / build / integration 매트릭스 (ubuntu + macOS) + macOS package smoke (`.github/workflows/ci.yml`)
-- [ ] tag 푸시 → release 자동 업로드 (artifacts: dmg, exe)
+- [x] tag 푸시 → release 자동 업로드 (`scripts/release.mjs` 인터랙티브 + `.github/workflows/release.yml` 매트릭스 빌드 → Draft Release)
 - [ ] README / README_ko 사용법 + 스크린샷
 - [ ] 릴리스 노트 v0.1.0
 
