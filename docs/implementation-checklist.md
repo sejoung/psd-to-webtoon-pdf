@@ -294,7 +294,7 @@
 
 ### 9.1 electron-builder
 - [x] `electron-builder` 설치 + `electron-builder.yml`
-- [x] `appId: com.realdraw.psd-to-pdf`, `productName: "PSD to PDF"`
+- [x] `appId: io.github.sejoung.psd-to-pdf`, `productName: "PSD to PDF"`
 - [x] `asarUnpack`: `node_modules/sharp/**`, `node_modules/@napi-rs/canvas/**`, `node_modules/@img/**`
 - [x] mac dmg (x64 + arm64) + dmg 레이아웃
 - [x] win nsis (x64) — 사용자 디렉터리 선택 허용

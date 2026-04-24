@@ -1,6 +1,6 @@
-appId: com.realdraw.psd-to-pdf
+appId: io.github.sejoung.psd-to-pdf
 productName: PSD to PDF
-copyright: Copyright © 2026 RealDraw
+copyright: Copyright © 2026 sejoung kim
 
 directories:
   output: release

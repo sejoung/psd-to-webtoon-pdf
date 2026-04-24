@@ -4,7 +4,7 @@
   "private": true,
   "description": "Convert multiple PSD files into a continuous PDF for easy review.",
   "license": "Apache-2.0",
-  "author": "RealDraw",
+  "author": "sejoung kim (https://github.com/sejoung)",
   "main": "./out/main/index.js",
   "type": "module",
   "engines": {
