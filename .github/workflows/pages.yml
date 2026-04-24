@@ -35,6 +35,10 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # Pages가 아직 활성화 안 된 repo에서도 자동으로 켜짐 (한 번만 효력).
+          # 이미 활성화된 경우엔 무시. permissions.pages: write 필요 (위에 설정됨).
+          enablement: true
 
       # 사이트 root에서 icons에 접근할 수 있도록 docs/icons 를 _site/icons 로 복사.
       - name: Stage site
