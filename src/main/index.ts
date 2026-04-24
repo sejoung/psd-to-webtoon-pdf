@@ -2,6 +2,9 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow, shell } from 'electron'
 import { registerIpcHandlers } from './ipc/handlers'
+import { initializeLogger, logger } from './services/logger'
+
+initializeLogger()
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -55,12 +58,11 @@ function createWindow(): void {
 app.whenReady().then(() => {
   registerIpcHandlers()
   createWindow()
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
+  logger.info('window created')
 })
 
+// macOS 표준은 윈도우 닫혀도 dock에 잔류이지만, 이 앱은 단순 유틸이라
+// 닫기 버튼 = 종료를 기대하는 사용자 흐름에 맞춤.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  app.quit()
 })

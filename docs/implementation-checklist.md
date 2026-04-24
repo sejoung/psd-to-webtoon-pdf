@@ -1,10 +1,6 @@
 # psd-to-webtoon-pdf — 구현 체크리스트
 
-> 본 문서는 다음 세 문서를 기반으로, Electron 데스크톱 앱을 처음부터 단계별로 만들기 위한 작업 단위 체크리스트입니다.
->
-> - `psd-to-pdf-standalone-spec.md` (기능/아키텍처/IPC/워커 알고리즘)
-> - `psd-to-webtoon-pdf-spec.md` (제품 정의 / MVP 범위)
-> - `psd-to-webtoon-pdf-design-system.md` (다크 모드, 컬러/타이포 토큰)
+> Electron 데스크톱 앱의 작업 단위 체크리스트. 디자인 시스템 토큰은 `psd-to-webtoon-pdf-design-system.md`를 참고합니다.
 >
 > 각 단계는 **독립적으로 작업 가능한 단위**로 끊었습니다. 한 번에 하나씩, 위에서 아래로 진행하면 동작하는 앱이 점진적으로 만들어지도록 구성했습니다. 체크박스를 채워가며 진행하세요.
 

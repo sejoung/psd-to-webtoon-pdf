@@ -36,6 +36,14 @@ export function ActionBar() {
     setResult(null)
     setPhase('merging')
 
+    void window.api.log('info', 'merge requested', {
+      jobId,
+      fileCount: files.length,
+      outputPath,
+      embed: options.embed,
+      pageSize: options.pageSize
+    })
+
     try {
       const result = await window.api.startMerge({
         jobId,
@@ -56,6 +64,8 @@ export function ActionBar() {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
+      const stack = err instanceof Error ? err.stack : undefined
+      void window.api.log('error', 'merge failed', { jobId, message, stack })
       setError(message)
       setPhase('error')
       pushToast({ message: `병합 실패: ${message}`, variant: 'error', durationMs: 6000 })

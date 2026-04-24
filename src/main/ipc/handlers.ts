@@ -1,6 +1,7 @@
 import { stat } from 'node:fs/promises'
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import type { MergeRequest, MergeResult } from '../../shared/types/index'
+import { getLogDirectory, getLogPath, rendererLogger } from '../services/logger'
 import { cancelMerge, runMerge } from '../services/merge-orchestrator'
 
 export function registerIpcHandlers(): void {
@@ -69,6 +70,24 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('show-in-folder', async (_event, path: string): Promise<void> => {
     shell.showItemInFolder(path)
+  })
+
+  ipcMain.handle(
+    'log-renderer',
+    (
+      _event,
+      level: 'error' | 'warn' | 'info' | 'debug',
+      message: string,
+      meta?: Record<string, unknown>
+    ): void => {
+      rendererLogger[level](message, meta ?? '')
+    }
+  )
+
+  ipcMain.handle('get-log-path', (): string => getLogPath())
+
+  ipcMain.handle('open-log-folder', async (): Promise<void> => {
+    await shell.openPath(getLogDirectory())
   })
 }
 

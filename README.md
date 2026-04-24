@@ -1,6 +1,12 @@
-# psd-to-webtoon-pdf
+<p align="center">
+  <img src="docs/icons/icon.svg" width="128" height="128" alt="PSD to PDF" />
+</p>
 
-Convert multiple Photoshop (`.psd`) files into a single, sequential PDF for visual review.
+<h1 align="center">psd-to-webtoon-pdf</h1>
+
+<p align="center">
+  Convert multiple Photoshop (<code>.psd</code>) files into a single, sequential PDF for visual review.
+</p>
 
 Built for webtoon/comic creators, illustrators, and editors who need to review batches of PSD files without opening Photoshop one by one.
 
@@ -25,6 +31,16 @@ Built for webtoon/comic creators, illustrators, and editors who need to review b
 npm install
 npm run dev          # Electron dev server with HMR
 ```
+
+### Logs
+
+Persistent logs (main, renderer, worker) live at:
+
+- **macOS**: `~/Library/Logs/PSD to PDF/main.log`
+- **Windows**: `%APPDATA%\PSD to PDF\logs\main.log`
+- **Linux**: `~/.config/PSD to PDF/logs/main.log`
+
+The "병합 실패" error screen has an **Open log folder** button.
 
 ### Quality scripts
 
@@ -60,7 +76,7 @@ Code signing for distribution requires environment variables:
 - macOS: `CSC_LINK`, `CSC_KEY_PASSWORD`, plus `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` for notarization.
 - Windows: `CSC_LINK` and `CSC_KEY_PASSWORD` for an Authenticode certificate.
 
-See [docs/implementation-checklist.md](docs/implementation-checklist.md) for the step-by-step build plan and [docs/psd-to-pdf-standalone-spec.md](docs/psd-to-pdf-standalone-spec.md) for the full specification.
+See [docs/implementation-checklist.md](docs/implementation-checklist.md) for the step-by-step build plan.
 
 한국어 README는 [README_ko.md](README_ko.md)를 참고하세요.
 

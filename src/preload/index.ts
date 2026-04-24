@@ -36,7 +36,20 @@ const api = {
   openPath: (path: string): Promise<void> => ipcRenderer.invoke('open-path', path),
 
   showInFolder: (path: string): Promise<void> =>
-    ipcRenderer.invoke('show-in-folder', path)
+    ipcRenderer.invoke('show-in-folder', path),
+
+  /** Renderer 측에서 발생한 로그/에러를 main의 영구 로그 파일에 기록. */
+  log: (
+    level: 'error' | 'warn' | 'info' | 'debug',
+    message: string,
+    meta?: Record<string, unknown>
+  ): Promise<void> => ipcRenderer.invoke('log-renderer', level, message, meta),
+
+  /** 로그 파일 절대 경로 (UI 표시용). */
+  getLogPath: (): Promise<string> => ipcRenderer.invoke('get-log-path'),
+
+  /** 로그가 들어있는 폴더를 OS 파일 매니저로 연다. */
+  openLogFolder: (): Promise<void> => ipcRenderer.invoke('open-log-folder')
 }
 
 contextBridge.exposeInMainWorld('api', api)

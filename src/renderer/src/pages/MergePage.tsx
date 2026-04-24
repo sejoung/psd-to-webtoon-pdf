@@ -2,10 +2,12 @@ import type { CSSProperties } from 'react'
 import { ActionBar } from '../components/ActionBar'
 import { CompletionCard } from '../components/CompletionCard'
 import { DropZone } from '../components/DropZone'
+import { ErrorCard } from '../components/ErrorCard'
 import { FileList } from '../components/FileList'
 import { OptionsPanel } from '../components/OptionsPanel'
 import { ProgressOverlay } from '../components/ProgressOverlay'
 import { Toaster } from '../components/Toaster'
+import { useGlobalErrorLogger } from '../hooks/useGlobalErrorLogger'
 import { useMergeProgressBridge } from '../hooks/useMergeProgressBridge'
 import { useMergeStore } from '../stores/mergeStore'
 
@@ -15,6 +17,7 @@ const dragStyle = { WebkitAppRegion: 'drag' } as CSSProperties
 
 export function MergePage() {
   useMergeProgressBridge()
+  useGlobalErrorLogger()
 
   const phase = useMergeStore((s) => s.phase)
   const fileCount = useMergeStore((s) => s.files.length)
@@ -58,6 +61,7 @@ export function MergePage() {
 
       {phase === 'merging' && <ProgressOverlay />}
       {phase === 'completed' && <CompletionCard />}
+      {phase === 'error' && <ErrorCard />}
 
       <Toaster />
     </div>

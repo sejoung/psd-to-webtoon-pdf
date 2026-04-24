@@ -1,6 +1,12 @@
-# psd-to-webtoon-pdf
+<p align="center">
+  <img src="docs/icons/icon.svg" width="128" height="128" alt="PSD to PDF" />
+</p>
 
-여러 장의 Photoshop(`.psd`) 파일을 한 묶음 PDF로 병합하는 데스크톱 유틸리티입니다.
+<h1 align="center">psd-to-webtoon-pdf</h1>
+
+<p align="center">
+  여러 장의 Photoshop(<code>.psd</code>) 파일을 한 묶음 PDF로 병합하는 데스크톱 유틸리티입니다.
+</p>
 
 웹툰/만화 제작자, 일러스트레이터, 편집자가 회차 분량 PSD를 PDF로 정리해 클라이언트 검수, 플랫폼 업로드 전 사전 정리, 프린트 샘플 생성 용도로 사용합니다.
 
@@ -25,6 +31,16 @@
 npm install
 npm run dev          # Electron 개발 서버 (HMR)
 ```
+
+### 로그
+
+main / renderer / worker의 영구 로그가 다음 위치에 누적됩니다:
+
+- **macOS**: `~/Library/Logs/PSD to PDF/main.log`
+- **Windows**: `%APPDATA%\PSD to PDF\logs\main.log`
+- **Linux**: `~/.config/PSD to PDF/logs/main.log`
+
+병합 실패 시 표시되는 "병합 실패" 화면에 **로그 폴더 열기** 버튼이 있습니다.
 
 ### 품질 스크립트
 
@@ -60,7 +76,7 @@ npm run package:dir    # 언팩 디렉터리만 (빠른 검증, 서명 X)
 - macOS: `CSC_LINK`, `CSC_KEY_PASSWORD`, 공증을 위해 `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`
 - Windows: 코드 서명 인증서를 위한 `CSC_LINK`, `CSC_KEY_PASSWORD`
 
-자세한 구현 단계는 [docs/implementation-checklist.md](docs/implementation-checklist.md), 상세 스펙은 [docs/psd-to-pdf-standalone-spec.md](docs/psd-to-pdf-standalone-spec.md)를 참고하세요.
+자세한 구현 단계는 [docs/implementation-checklist.md](docs/implementation-checklist.md)를 참고하세요.
 
 ## 라이선스
 

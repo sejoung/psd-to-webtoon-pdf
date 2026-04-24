@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { Worker } from 'node:worker_threads'
 import type { WebContents } from 'electron'
 import type { MergeProgress, MergeRequest, MergeResult } from '../../shared/types/index'
+import { workerLogger } from './logger'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -79,17 +80,41 @@ export function spawnMergeWorker(
     void worker.terminate()
   }
 
+  workerLogger.info('merge started', {
+    jobId: req.jobId,
+    fileCount: req.filePaths.length,
+    embed: req.options.embed,
+    pageSize: req.options.pageSize,
+    onError: req.options.onError
+  })
+
   worker.on('message', (msg: WorkerMessage) => {
     if (msg.type === 'progress') {
-      options.onProgress?.(msg.payload as MergeProgress)
+      const p = msg.payload as MergeProgress
+      if (p.phase === 'error' || p.errorMessage) {
+        workerLogger.warn('progress error', p)
+      }
+      options.onProgress?.(p)
     } else if (msg.type === 'done') {
-      resolveOnce(msg.payload as MergeResult)
+      const r = msg.payload as MergeResult
+      workerLogger.info('merge done', {
+        jobId: req.jobId,
+        cancelled: r.cancelled === true,
+        pageCount: r.pageCount,
+        skipped: r.skippedIndices.length,
+        elapsedMs: r.elapsedMs,
+        fileSizeBytes: r.fileSizeBytes
+      })
+      resolveOnce(r)
     } else if (msg.type === 'error') {
-      rejectOnce(new Error(msg.payload as string))
+      const message = String(msg.payload)
+      workerLogger.error('merge worker reported error', { jobId: req.jobId, message })
+      rejectOnce(new Error(message))
     }
   })
 
   worker.on('error', (err) => {
+    workerLogger.error('worker uncaught error', { jobId: req.jobId, err })
     rejectOnce(err)
   })
 
@@ -98,12 +123,14 @@ export function spawnMergeWorker(
     if (settled) return
     if (code !== 0) {
       // §10 #12: 워커 segfault 등 native crash. try/catch로 잡히지 않음.
+      workerLogger.error('worker exit non-zero', { jobId: req.jobId, code })
       rejectOnce(
         new Error(
           `Merge worker exited unexpectedly (code ${code}). 처리 중 오류가 발생했습니다 — 더 적은 파일이나 낮은 품질로 다시 시도해 주세요.`
         )
       )
     } else {
+      workerLogger.error('worker exit without result', { jobId: req.jobId })
       rejectOnce(new Error('Merge worker exited without producing a result'))
     }
   })
