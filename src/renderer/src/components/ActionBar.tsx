@@ -1,6 +1,7 @@
 import { ArrowRight, Trash2 } from 'lucide-react'
 import { useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { useT } from '../i18n/useT'
 import { useMergeStore } from '../stores/mergeStore'
 import { useToastStore } from '../stores/toastStore'
 import { Button } from './Button'
@@ -21,6 +22,7 @@ export function ActionBar() {
   const setError = useMergeStore((s) => s.setError)
   const clearFiles = useMergeStore((s) => s.clearFiles)
   const pushToast = useToastStore((s) => s.push)
+  const t = useT()
 
   const canStart = files.length >= 1
 
@@ -55,7 +57,7 @@ export function ActionBar() {
       if (result.cancelled) {
         setPhase('cancelled')
         pushToast({
-          message: '병합이 취소되었습니다',
+          message: t('toast.cancelled'),
           variant: 'info',
           durationMs: 3500
         })
@@ -68,9 +70,13 @@ export function ActionBar() {
       void window.api.log('error', 'merge failed', { jobId, message, stack })
       setError(message)
       setPhase('error')
-      pushToast({ message: `병합 실패: ${message}`, variant: 'error', durationMs: 6000 })
+      pushToast({
+        message: t('toast.failed', { message }),
+        variant: 'error',
+        durationMs: 6000
+      })
     }
-  }, [canStart, files, options, setError, setJobId, setPhase, setResult, pushToast])
+  }, [canStart, files, options, setError, setJobId, setPhase, setResult, pushToast, t])
 
   return (
     <div className="flex items-center justify-between gap-3 border-t border-border bg-bg/80 px-6 py-4">
@@ -80,7 +86,7 @@ export function ActionBar() {
         onClick={clearFiles}
         disabled={files.length === 0}
       >
-        목록 비우기
+        {t('actions.clear')}
       </Button>
       <Button
         variant="primary"
@@ -88,7 +94,7 @@ export function ActionBar() {
         onClick={handleStart}
         disabled={!canStart}
       >
-        PDF 생성
+        {t('actions.start')}
       </Button>
     </div>
   )

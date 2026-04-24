@@ -3,32 +3,22 @@
  *
  * 빌드된 `out/main/merge.worker.js`를 직접 spawn해서 합성 PSD → PDF 변환을 검증.
  * 실행 전 `npm run build` 필요. (`npm run test:integration` / `test:all`이 자동 처리)
- *
- * 검증 범위:
- * - 단일 PSD → 1페이지 PDF 생성
- * - 다중 PSD → N페이지 PDF 생성
- * - onError=skip → 잘못된 파일 스킵 + 나머지 처리
- * - onError=abort → 잘못된 파일에서 즉시 throw + 부분 파일 삭제
- * - cancel → 부분 파일 삭제 + cancelled: true 반환
- *
- * 핵심: orchestrator가 'done' 메시지 받은 즉시 resolve해서 promise가 멈추지 않는지.
  */
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { spawnMergeWorker } from '@main/services/merge-orchestrator'
 import { createCanvas } from '@napi-rs/canvas'
+import type { MergeRequest } from '@shared/types/index'
 import { initializeCanvas, writePsd } from 'ag-psd'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import type { MergeRequest } from '../../../shared/types/index'
-import { spawnMergeWorker } from '../merge-orchestrator'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const ROOT = resolve(__dirname, '../../../..')
+const ROOT = resolve(__dirname, '../..')
 const WORKER_PATH = resolve(ROOT, 'out/main/merge.worker.js')
 const TMP = resolve(tmpdir(), `psd-pdf-it-${process.pid}`)
 
-// ag-psd가 writePsd 시 canvas로 일부 데이터를 그릴 수 있어 노드 환경에선 주입 필요.
 initializeCanvas(createCanvas as unknown as Parameters<typeof initializeCanvas>[0])
 
 beforeAll(() => {
@@ -57,7 +47,6 @@ function makeSyntheticPsd(
     data[i + 2] = rgb[2]
     data[i + 3] = 255
   }
-  // ag-psd의 Psd 인터페이스: 최소한 width/height/imageData 만 있으면 composite 형태로 기록됨.
   const psd = {
     width,
     height,
@@ -112,7 +101,6 @@ describe('merge-orchestrator (integration)', () => {
     expect(result.elapsedMs).toBeGreaterThanOrEqual(0)
     expect(isPdf(outputPath)).toBe(true)
 
-    // 진행률 phase가 순서대로 보고되는지
     expect(phasesSeen).toContain('init')
     expect(phasesSeen).toContain('parse')
     expect(phasesSeen).toContain('encode')
@@ -163,8 +151,7 @@ describe('merge-orchestrator (integration)', () => {
       { workerPath: WORKER_PATH }
     ).promise
 
-    // 2개 PSD + 사이에 갭 페이지 1개 = 3 페이지
-    expect(result.pageCount).toBe(2) // pageCount는 PSD 수만 셈 (갭은 미포함)
+    expect(result.pageCount).toBe(2)
     expect(isPdf(outputPath)).toBe(true)
   })
 
@@ -173,7 +160,6 @@ describe('merge-orchestrator (integration)', () => {
     writeFileSync(valid, makeSyntheticPsd(80, 80, [0, 0, 255]))
 
     const outputPath = resolve(TMP, 'with-skip.pdf')
-    const phasesSeen: string[] = []
     const result = await spawnMergeWorker(
       {
         jobId: 'it-4',
@@ -181,7 +167,7 @@ describe('merge-orchestrator (integration)', () => {
         outputPath,
         options: { ...defaultOptions(), onError: 'skip' }
       },
-      { workerPath: WORKER_PATH, onProgress: (p) => phasesSeen.push(p.phase) }
+      { workerPath: WORKER_PATH }
     ).promise
 
     expect(result.skippedIndices).toEqual([0])
@@ -208,7 +194,6 @@ describe('merge-orchestrator (integration)', () => {
   })
 
   it('cancel: 처리 중 취소 → cancelled: true + 부분 파일 삭제', async () => {
-    // 충분히 많은(그리고 어느 정도 크기 있는) PSD로 cancel 타이밍 확보.
     const paths: string[] = []
     for (let i = 0; i < 8; i++) {
       const p = resolve(TMP, `c${i}.psd`)
@@ -227,7 +212,6 @@ describe('merge-orchestrator (integration)', () => {
       { workerPath: WORKER_PATH }
     )
 
-    // 첫 PSD 인코딩 중에 취소 요청.
     setTimeout(() => handle.cancel(), 80)
 
     const result = await handle.promise
@@ -235,9 +219,7 @@ describe('merge-orchestrator (integration)', () => {
     expect(existsSync(outputPath)).toBe(false)
   })
 
-  it('promise가 적시에 resolve된다 (10초 안에)', async () => {
-    // 회귀 방지: orchestrator가 'done' 메시지 즉시 resolve하지 않으면
-    // worker_thread가 살아있어 영원히 stuck → 이 테스트가 timeout으로 실패.
+  it('promise가 적시에 resolve된다 (10초 안에) — worker exit 의존 회귀 방지', async () => {
     const p = resolve(TMP, 'quick.psd')
     writeFileSync(p, makeSyntheticPsd(100, 100, [200, 200, 0]))
 

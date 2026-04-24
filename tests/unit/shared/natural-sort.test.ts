@@ -1,5 +1,5 @@
+import { compareNatural, naturalSort } from '@shared/utils/natural-sort'
 import { describe, expect, it } from 'vitest'
-import { compareNatural, naturalSort } from '../natural-sort'
 
 describe('compareNatural', () => {
   it('정수 부분을 수치 비교 (001 < 002 < 010)', () => {

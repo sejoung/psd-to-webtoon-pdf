@@ -1,5 +1,5 @@
+import { formatBytes } from '@shared/utils/format-bytes'
 import { describe, expect, it } from 'vitest'
-import { formatBytes } from '../format-bytes'
 
 describe('formatBytes', () => {
   it('0 → "0 B"', () => {

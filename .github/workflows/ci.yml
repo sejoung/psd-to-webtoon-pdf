@@ -46,6 +46,7 @@ jobs:
         run: npm run build
 
       - name: Integration tests (worker pipeline)
+        # build는 이미 위 단계에서 끝났으므로 vitest만 직접 호출.
         run: npx vitest run --config vitest.integration.config.ts
 
   package-smoke:

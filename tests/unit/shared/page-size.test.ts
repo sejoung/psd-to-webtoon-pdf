@@ -1,5 +1,5 @@
+import { computePageSize } from '@shared/utils/page-size'
 import { describe, expect, it } from 'vitest'
-import { computePageSize } from '../page-size'
 
 describe('computePageSize', () => {
   it('mode=auto → 원본 그대로', () => {

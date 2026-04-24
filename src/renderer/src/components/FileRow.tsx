@@ -1,5 +1,6 @@
 import { formatBytes } from '@shared/utils/format-bytes'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
+import { useT } from '../i18n/useT'
 import type { FileEntry } from '../stores/mergeStore'
 
 interface FileRowProps {
@@ -21,6 +22,7 @@ export function FileRow({
 }: FileRowProps) {
   const isFirst = index === 0
   const isLast = index === total - 1
+  const t = useT()
 
   return (
     <div className="group flex items-center gap-2 px-4 py-2 transition-colors hover:bg-surface">
@@ -33,7 +35,7 @@ export function FileRow({
           type="button"
           onClick={() => onMoveUp(index)}
           disabled={isFirst}
-          aria-label="Move up"
+          aria-label={t('fileList.aria.moveUp')}
           className="rounded p-1 text-text-secondary transition-colors hover:bg-bg hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-secondary"
         >
           <ChevronUp size={14} />
@@ -42,7 +44,7 @@ export function FileRow({
           type="button"
           onClick={() => onMoveDown(index)}
           disabled={isLast}
-          aria-label="Move down"
+          aria-label={t('fileList.aria.moveDown')}
           className="rounded p-1 text-text-secondary transition-colors hover:bg-bg hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-secondary"
         >
           <ChevronDown size={14} />
@@ -61,7 +63,7 @@ export function FileRow({
       <button
         type="button"
         onClick={() => onRemove(file.path)}
-        aria-label="Remove"
+        aria-label={t('fileList.aria.remove')}
         className="rounded p-1 text-text-secondary transition-colors hover:bg-error/10 hover:text-error"
       >
         <X size={14} />

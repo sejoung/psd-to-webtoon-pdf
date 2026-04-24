@@ -240,14 +240,14 @@
 
 ---
 
-## Phase 7 — i18n (영어 / 한국어) — **v0.2 백로그로 이동**
+## Phase 7 — i18n (영어 / 한국어)
 
-> 사용자 한국어 선호 + UI 카피가 한국어로 박혀 있어 v0.1 단계에서는 의도적으로 미적용.
-> 영어 사용자 대응 필요 시 v0.2에서 `react-i18next` 또는 경량 자체 구현으로 도입.
-
-- [ ] `src/renderer/src/i18n/en.ts`, `ko.ts` 키 정의
-- [ ] OS 언어 자동 감지 → 한국어 우선
-- [ ] 언어 토글 (헤더) — 사용자 설정 영구 저장
+- [x] `src/renderer/src/i18n/messages.ts` 키 정의 (~50 키, ko/en 동시)
+- [x] `useT()` hook + `makeT(locale)` (React 외부에서도 사용 가능)
+- [x] 첫 실행 기본은 영어 (글로벌 사용자 친화). 사용자 선택은 `localStorage`에 영구 저장
+- [x] 언어 토글 (헤더 우측 KO/EN 버튼) — `localStorage`에 영구 저장
+- [x] `formatDuration` / `phaseLabel` 도 i18n 통합 (locale 인자 받음)
+- 의도적 미적용: 워커/main 에러 메시지는 한국어 그대로 (사용자 한국어 선호 + 에러 코드 → renderer 매핑은 v0.2 작업)
 
 ---
 

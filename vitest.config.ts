@@ -1,25 +1,29 @@
 import { resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
 
+/**
+ * 단위 테스트 설정. 운영 소스(`src/`)와 분리된 `tests/unit/` 만 실행.
+ * 통합 테스트는 `vitest.integration.config.ts` 참조.
+ */
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['src/**/__tests__/**/*.test.ts', 'src/**/*.test.ts'],
-    // 기본 `npm test`는 단위 테스트만. 통합 테스트는 빌드된 워커가 필요하므로
-    // `npm run test:integration` 또는 `npm run test:all`을 통해 별도로 실행.
-    exclude: ['**/node_modules/**', '**/dist/**', '**/*.integration.test.ts'],
+    include: ['tests/unit/**/*.test.ts'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/out/**'],
     globals: false,
-    testTimeout: 30000,
+    testTimeout: 30_000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['src/shared/**/*.ts'],
-      exclude: ['src/shared/types/**']
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: ['src/**/*.d.ts', 'src/shared/types/**', 'src/renderer/index.html']
     }
   },
   resolve: {
     alias: {
-      '@shared': resolve(__dirname, 'src/shared')
+      '@shared': resolve(__dirname, 'src/shared'),
+      '@main': resolve(__dirname, 'src/main'),
+      '@renderer': resolve(__dirname, 'src/renderer/src')
     }
   }
 })

@@ -1,6 +1,6 @@
+import { type FileEntry, makeFileEntry, useMergeStore } from '@renderer/stores/mergeStore'
 import { DEFAULT_MERGE_OPTIONS } from '@shared/types/index'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { type FileEntry, makeFileEntry, useMergeStore } from '../mergeStore'
 
 function reset(): void {
   useMergeStore.setState(
@@ -189,7 +189,6 @@ describe('mergeStore.clearFiles / resetSession', () => {
     expect(after.jobId).toBeNull()
     expect(after.result).toBeNull()
     expect(after.errorMessage).toBeNull()
-    // 파일 목록은 보존 (재시도 시 같은 파일들로 다시 시도 가능)
     expect(after.files).toHaveLength(1)
   })
 

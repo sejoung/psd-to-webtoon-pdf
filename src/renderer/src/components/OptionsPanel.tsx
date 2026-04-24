@@ -1,3 +1,4 @@
+import { useT } from '../i18n/useT'
 import { useMergeStore } from '../stores/mergeStore'
 import { Card, CardBody, CardHeader } from './Card'
 
@@ -53,6 +54,7 @@ function Field({
 export function OptionsPanel() {
   const options = useMergeStore((s) => s.options)
   const setOptions = useMergeStore((s) => s.setOptions)
+  const t = useT()
 
   const isJpeg = options.embed.format === 'jpeg'
   const isAutoSize = options.pageSize.mode === 'auto'
@@ -60,13 +62,13 @@ export function OptionsPanel() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-sm font-semibold">옵션</h2>
+        <h2 className="text-sm font-semibold">{t('options.title')}</h2>
       </CardHeader>
       <CardBody className="flex flex-col gap-6">
-        <Field label="임베드 포맷">
+        <Field label={t('options.embed.label')}>
           <div className="flex flex-col gap-2">
             <Radio
-              label="JPEG"
+              label={t('options.embed.jpeg')}
               checked={isJpeg}
               onChange={() =>
                 setOptions({
@@ -96,22 +98,22 @@ export function OptionsPanel() {
               )}
             </Radio>
             <Radio
-              label="PNG (무손실)"
+              label={t('options.embed.png')}
               checked={!isJpeg}
               onChange={() => setOptions({ embed: { format: 'png' } })}
             />
           </div>
         </Field>
 
-        <Field label="페이지 크기">
+        <Field label={t('options.size.label')}>
           <div className="flex flex-col gap-2">
             <Radio
-              label="자동 (원본 크기 유지)"
+              label={t('options.size.auto')}
               checked={isAutoSize}
               onChange={() => setOptions({ pageSize: { mode: 'auto' } })}
             />
             <Radio
-              label="고정 너비"
+              label={t('options.size.fixedWidth')}
               checked={!isAutoSize}
               onChange={() =>
                 setOptions({
@@ -142,7 +144,9 @@ export function OptionsPanel() {
                     }
                     className="h-7 w-20 rounded-card border border-border bg-bg px-2 text-right text-xs text-text-primary focus:border-accent focus:outline-none"
                   />
-                  <span className="text-xs text-text-secondary">px</span>
+                  <span className="text-xs text-text-secondary">
+                    {t('options.size.unitPx')}
+                  </span>
                 </div>
               )}
             </Radio>
@@ -162,13 +166,13 @@ export function OptionsPanel() {
                   }
                   className="h-3.5 w-3.5 cursor-pointer accent-accent"
                 />
-                원본보다 작을 땐 확대하지 않기
+                {t('options.size.withoutEnlargement')}
               </label>
             )}
           </div>
         </Field>
 
-        <Field label="페이지 간 여백" hint="px (페이지 사이 흰 공간)">
+        <Field label={t('options.gap.label')} hint={t('options.gap.hint')}>
           <input
             type="number"
             min={0}
@@ -182,15 +186,15 @@ export function OptionsPanel() {
           />
         </Field>
 
-        <Field label="오류 발생 시">
+        <Field label={t('options.errorPolicy.label')}>
           <div className="flex flex-col gap-2">
             <Radio
-              label="계속 진행 (실패 파일 건너뛰기)"
+              label={t('options.errorPolicy.skip')}
               checked={options.onError === 'skip'}
               onChange={() => setOptions({ onError: 'skip' })}
             />
             <Radio
-              label="중단"
+              label={t('options.errorPolicy.abort')}
               checked={options.onError === 'abort'}
               onChange={() => setOptions({ onError: 'abort' })}
             />

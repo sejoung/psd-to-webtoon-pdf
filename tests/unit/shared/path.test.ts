@@ -1,5 +1,5 @@
+import { basenameFromPath, extensionOf } from '@shared/utils/path'
 import { describe, expect, it } from 'vitest'
-import { basenameFromPath, extensionOf } from '../path'
 
 describe('basenameFromPath', () => {
   it('유닉스 경로', () => {

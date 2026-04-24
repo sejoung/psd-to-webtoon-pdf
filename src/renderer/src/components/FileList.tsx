@@ -1,5 +1,6 @@
 import { FilePlus2 } from 'lucide-react'
 import { useCallback } from 'react'
+import { useT } from '../i18n/useT'
 import { makeFileEntry, useMergeStore } from '../stores/mergeStore'
 import { useToastStore } from '../stores/toastStore'
 import { Button } from './Button'
@@ -13,6 +14,7 @@ export function FileList() {
   const moveUp = useMergeStore((s) => s.moveUp)
   const moveDown = useMergeStore((s) => s.moveDown)
   const pushToast = useToastStore((s) => s.push)
+  const t = useT()
 
   const handleAdd = useCallback(async () => {
     const paths = await window.api.selectPsdFiles()
@@ -23,27 +25,28 @@ export function FileList() {
     const ignored = paths.length - (useMergeStore.getState().files.length - before)
     if (ignored > 0) {
       pushToast({
-        message: `중복된 ${ignored}개 파일은 건너뛰었습니다`,
+        message: t('fileList.duplicateSkipped', { count: ignored }),
         variant: 'info',
         durationMs: 3000
       })
     }
-  }, [addFiles, files.length, pushToast])
+  }, [addFiles, files.length, pushToast, t])
 
   return (
     <Card className="flex h-full min-h-0 flex-col">
       <CardHeader>
         <h2 className="text-sm font-semibold">
-          파일 <span className="text-text-secondary">({files.length})</span>
+          {t('fileList.title')}{' '}
+          <span className="text-text-secondary">({files.length})</span>
         </h2>
         <Button size="sm" leftIcon={<FilePlus2 size={14} />} onClick={handleAdd}>
-          추가
+          {t('fileList.addButton')}
         </Button>
       </CardHeader>
       <CardBody className="min-h-0 flex-1 overflow-y-auto p-0">
         {files.length === 0 ? (
           <div className="flex h-full items-center justify-center p-6 text-sm text-text-secondary">
-            추가된 파일이 없습니다
+            {t('fileList.empty')}
           </div>
         ) : (
           <div className="divide-y divide-border">

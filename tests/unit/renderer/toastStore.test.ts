@@ -1,5 +1,5 @@
+import { useToastStore } from '@renderer/stores/toastStore'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useToastStore } from '../toastStore'
 
 beforeEach(() => useToastStore.getState().clear())
 

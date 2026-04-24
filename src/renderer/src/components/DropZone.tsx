@@ -1,6 +1,7 @@
 import { FilePlus2, Inbox } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFileDrop } from '../hooks/useFileDrop'
+import { useT } from '../i18n/useT'
 import { makeFileEntry, useMergeStore } from '../stores/mergeStore'
 import { useToastStore } from '../stores/toastStore'
 
@@ -10,6 +11,7 @@ export function DropZone() {
   const addFiles = useMergeStore((s) => s.addFiles)
   const fileCount = useMergeStore((s) => s.files.length)
   const pushToast = useToastStore((s) => s.push)
+  const t = useT()
 
   const ingestPaths = useCallback(
     async (paths: string[]) => {
@@ -23,12 +25,12 @@ export function DropZone() {
   const handleRejected = useCallback(
     (count: number) => {
       pushToast({
-        message: `PSD가 아닌 ${count}개 파일을 무시했습니다`,
+        message: t('dropzone.ignoredNonPsd', { count }),
         variant: 'info',
         durationMs: 3500
       })
     },
-    [pushToast]
+    [pushToast, t]
   )
 
   const { isOver, bind } = useFileDrop({
@@ -59,11 +61,11 @@ export function DropZone() {
         strokeWidth={1.25}
       />
       <p className="mt-6 text-base font-medium text-text-primary">
-        PSD 파일을 드래그해서 여기에 놓으세요
+        {t('dropzone.dragHere')}
       </p>
       <p className="mt-2 text-sm text-text-secondary">
-        한 개부터 시작할 수 있어요
-        {fileCount > 0 && ` (현재 ${fileCount}개)`}
+        {t('dropzone.minOneHint')}
+        {fileCount > 0 && ` ${t('dropzone.currentCount', { count: fileCount })}`}
       </p>
 
       <button
@@ -77,7 +79,7 @@ export function DropZone() {
         ].join(' ')}
       >
         <FilePlus2 size={16} />
-        파일 선택
+        {t('dropzone.selectButton')}
       </button>
     </div>
   )

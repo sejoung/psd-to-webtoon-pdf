@@ -4,11 +4,13 @@ import { CompletionCard } from '../components/CompletionCard'
 import { DropZone } from '../components/DropZone'
 import { ErrorCard } from '../components/ErrorCard'
 import { FileList } from '../components/FileList'
+import { LocaleToggle } from '../components/LocaleToggle'
 import { OptionsPanel } from '../components/OptionsPanel'
 import { ProgressOverlay } from '../components/ProgressOverlay'
 import { Toaster } from '../components/Toaster'
 import { useGlobalErrorLogger } from '../hooks/useGlobalErrorLogger'
 import { useMergeProgressBridge } from '../hooks/useMergeProgressBridge'
+import { useT } from '../i18n/useT'
 import { useMergeStore } from '../stores/mergeStore'
 
 const isMac = window.api.platform === 'darwin'
@@ -21,6 +23,7 @@ export function MergePage() {
 
   const phase = useMergeStore((s) => s.phase)
   const fileCount = useMergeStore((s) => s.files.length)
+  const t = useT()
 
   const showDropZone = fileCount === 0
 
@@ -35,10 +38,9 @@ export function MergePage() {
       >
         <div className="flex items-baseline gap-3">
           <h1 className="text-sm font-semibold tracking-tight">PSD → PDF</h1>
-          <span className="text-xs text-text-secondary">
-            여러 PSD를 한 권의 PDF로 묶기
-          </span>
+          <span className="text-xs text-text-secondary">{t('header.subtitle')}</span>
         </div>
+        <LocaleToggle />
       </header>
 
       <main className="flex flex-1 flex-col overflow-hidden">

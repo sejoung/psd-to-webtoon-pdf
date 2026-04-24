@@ -1,7 +1,7 @@
+import { extractRgba } from '@main/services/extract-rgba'
 import { createCanvas } from '@napi-rs/canvas'
 import { initializeCanvas, readPsd, writePsd } from 'ag-psd'
 import { describe, expect, it } from 'vitest'
-import { extractRgba } from '../extract-rgba'
 
 initializeCanvas(createCanvas as unknown as Parameters<typeof initializeCanvas>[0])
 
@@ -30,12 +30,10 @@ describe('extractRgba', () => {
     const psd = buildPsdWithComposite(10, 8, [255, 0, 0])
     const out = extractRgba(psd)
     expect(out.length).toBe(10 * 8 * 4)
-    // 첫 픽셀 RGBA = (255, 0, 0, 255)
     expect(out[0]).toBe(255)
     expect(out[1]).toBe(0)
     expect(out[2]).toBe(0)
     expect(out[3]).toBe(255)
-    // 마지막 픽셀도
     expect(out[out.length - 4]).toBe(255)
     expect(out[out.length - 3]).toBe(0)
   })
@@ -79,13 +77,12 @@ describe('extractRgba', () => {
   })
 
   it('imageData가 너무 짧으면 canvas fallback으로 진행 (불완전 데이터 거부)', () => {
-    // imageData.data가 width*height*4보다 작으면 imageData 분기를 건너뛰어야 함
     const width = 4
     const height = 4
     const fakePsd = {
       width,
       height,
-      imageData: { data: new Uint8Array(8) }, // 너무 짧음
+      imageData: { data: new Uint8Array(8) },
       canvas: {
         getContext: () => ({
           getImageData: () => ({ data: new Uint8Array(width * height * 4).fill(50) })
@@ -94,6 +91,6 @@ describe('extractRgba', () => {
     } as unknown as ReturnType<typeof readPsd>
 
     const out = extractRgba(fakePsd)
-    expect(out[0]).toBe(50) // canvas로부터 채워짐
+    expect(out[0]).toBe(50)
   })
 })

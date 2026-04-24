@@ -1,5 +1,5 @@
+import { detectPsdKind } from '@shared/utils/psd-format'
 import { describe, expect, it } from 'vitest'
-import { detectPsdKind } from '../psd-format'
 
 function withSignature(version: number, extra = 10): Buffer {
   const buf = Buffer.alloc(6 + extra)
