@@ -13,13 +13,15 @@ concurrency:
 
 jobs:
   verify:
-    name: Lint + Typecheck + Test (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    name: Lint + Typecheck + Tests
+    # 단일 OS에서만 — lint/typecheck/단위 테스트는 OS-independent.
+    # 워커 파이프라인 통합 테스트도 ubuntu에서 한 번 검증하면 충분 (sharp/canvas는
+    # 모든 OS에 prebuild 제공). OS별 native build 검증은 release 워크플로우의
+    # matrix에서 자연스럽게 이뤄짐.
+    runs-on: ubuntu-latest
+    # 정상 ~3분 (npm ci + lint + tsc + vitest + electron-vite build + integration).
+    # 1.5~2배 버퍼만 두고 hang 감지.
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +31,14 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+
+      # Electron binary는 npm ci postinstall에서 ~116MB 다운로드. 캐시로 0초 히트.
+      - name: Cache Electron binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/electron
+          key: electron-ubuntu-${{ hashFiles('package-lock.json') }}
+          restore-keys: electron-ubuntu-
 
       - name: Install dependencies
         run: npm ci
@@ -46,35 +56,4 @@ jobs:
         run: npm run build
 
       - name: Integration tests (worker pipeline)
-        # build는 이미 위 단계에서 끝났으므로 vitest만 직접 호출.
         run: npx vitest run --config vitest.integration.config.ts
-
-  package-smoke:
-    name: Package smoke (${{ matrix.os }})
-    needs: verify
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      # 서명/공증 없이 .app 디렉터리만 생성해 패키징 파이프라인 자체가 깨지지 않는지만 확인.
-      # 실제 dmg/exe 생성과 서명은 릴리스 워크플로우에서.
-      - name: electron-builder --dir
-        run: npm run package:dir
-        env:
-          # 패키징 시 자동 코드 서명 시도를 막아 시간/실패 회피
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'

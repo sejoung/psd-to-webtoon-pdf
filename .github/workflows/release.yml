@@ -17,6 +17,9 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+# `npm run release`(scripts/release.mjs)가 로컬에서 이미 verify(lint+typecheck+
+# unit+integration)를 돌렸기 때문에, 이 워크플로우는 OS별 native build와
+# 패키징만 담당. 테스트 재실행 없음 — 빠른 릴리즈를 위해.
 jobs:
   build:
     name: Build (${{ matrix.os }})
@@ -26,12 +29,19 @@ jobs:
         include:
           - os: macos-latest
             artifact_pattern: 'release/*.dmg'
+            electron_cache: ~/Library/Caches/electron
+            builder_cache: ~/Library/Caches/electron-builder
           - os: windows-latest
             artifact_pattern: 'release/*.exe'
+            electron_cache: ~\AppData\Local\electron\Cache
+            builder_cache: ~\AppData\Local\electron-builder\Cache
           - os: ubuntu-latest
             artifact_pattern: 'release/*.AppImage'
+            electron_cache: ~/.cache/electron
+            builder_cache: ~/.cache/electron-builder
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    # 정상 ~10-15분 (electron 116MB 다운로드 + native rebuild + electron-builder).
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,17 +52,22 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
 
+      # Electron binary (~116MB) + electron-builder가 받는 chrome-headless 등 캐싱.
+      # release 빌드에서 가장 큰 시간 단축 (히트 시 30-60초 절약).
+      - name: Cache Electron + builder
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ matrix.electron_cache }}
+            ${{ matrix.builder_cache }}
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: electron-${{ runner.os }}-
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify (lint + typecheck + tests)
-        run: npm run check && npm run typecheck && npm test
-
       - name: Build app (electron-vite)
         run: npm run build
-
-      - name: Integration tests (worker pipeline)
-        run: npx vitest run --config vitest.integration.config.ts
 
       # macOS: dmg 생성. CSC_LINK가 secrets에 있으면 서명, 없으면 ad-hoc.
       - name: Package — macOS
@@ -91,7 +106,8 @@ jobs:
     name: Create Draft Release
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 정상 ~1-2분 (artifacts 다운로드 + softprops/action-gh-release).
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
