@@ -257,25 +257,33 @@
 
 ## Phase 8 — 테스트
 
-### 8.1 단위 (Vitest)
-- [x] `natural-sort` (수치 비교, 자릿수, 대소문자, 빈 문자열 — 5 케이스)
+### 8.1 단위 (Vitest) — 8 파일 / 65 케이스
+- [x] `natural-sort` (수치/자릿수/대소문자/빈 문자열)
 - [x] `format-bytes` (경계값, 소수점 옵션, 비정상 입력)
 - [x] `computePageSize` (auto / fixed-width / 종횡비 / withoutEnlargement / 라운딩)
 - [x] `path` (basenameFromPath, extensionOf — Unix/Windows/혼합)
 - [x] `format-duration` + `phaseLabel`
-- [ ] `extractRgba` (ag-psd `writePsd`로 합성 PSD → 파싱 → 바이트 검증) — v0.2
+- [x] `mergeStore` (addFiles/removeFile/moveUp·Down/clearFiles/resetSession/setOptions, dedupe + 자연정렬, phase 전환)
+- [x] `toastStore` (push/dismiss/clear, default variant/duration)
+- [x] `extractRgba` (imageData 1순위 / canvas fallback / 빈 PSD throw / 짧은 imageData → fallback)
 
-### 8.2 통합 (Vitest, 임시 파일) — **v0.2 백로그**
-- [ ] 워커 직접 spawn → 합성 PSD 병합 → `pdfjs-dist`로 페이지 수 검증
-- [ ] 너비 불일치 PSD 리사이즈 검증
-- [ ] 손상 PSD + skip 정책 → skipped 인덱스 검증
-- [ ] 취소 시그널 → 부분 파일 삭제 확인
+### 8.2 통합 (Vitest, 임시 파일) — 1 파일 / 7 케이스
+- [x] 워커 직접 spawn → 합성 PSD 병합 → PDF 매직 바이트 검증
+- [x] 단일 PSD → 1페이지 / 다중 PSD → N페이지 (JPEG, PNG)
+- [x] 고정 너비 리사이즈 + 페이지 간 여백
+- [x] `onError=skip` → skipped 인덱스 검증
+- [x] `onError=abort` → throw + 부분 파일 삭제
+- [x] cancel 시그널 → `cancelled: true` + 부분 파일 삭제
+- [x] **회귀 방지**: promise 10초 내 resolve (worker exit 의존 버그 차단)
+- [ ] `pdfjs-dist`로 페이지 차원/내용 정밀 검증 — v0.2
 
-### 8.3 E2E (Playwright + Electron) — **v0.2 백로그**
-- [ ] 드롭 → 병합 → 완료 골든패스
-- [ ] 취소 → idle 복귀
-- [ ] 혼합 드롭 필터링
-- [ ] [PDF 열기] OS 분기 동작
+### 8.3 React 컴포넌트 / 훅 / E2E — **v0.2 백로그**
+> RTL+jsdom 셋업 + Playwright Electron 셋업 필요. 현재는 통합 테스트가 핵심 시나리오를 커버.
+
+- [ ] React Testing Library 도입 (DropZone, FileList, OptionsPanel, ActionBar, ProgressOverlay, CompletionCard)
+- [ ] 훅 테스트 (`useFileDrop`, `useMergeProgressBridge`)
+- [ ] IPC 핸들러 테스트 (electron mock — `select-psd-files`, `stat-files` 등)
+- [ ] Playwright + Electron E2E (드롭 → 병합 → 완료, 취소, 혼합 드롭, [PDF 열기] OS 분기)
 
 ### 8.4 수동 체크 (매 릴리스 — spec §11.4)
 - [ ] macOS Preview / Windows 기본 뷰어 / Adobe Acrobat 모두 정상 표시

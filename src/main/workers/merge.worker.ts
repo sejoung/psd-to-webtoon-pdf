@@ -22,6 +22,7 @@ import PDFDocument from 'pdfkit'
 import sharp from 'sharp'
 import type { MergeProgress, MergeRequest, MergeResult } from '../../shared/types/index'
 import { computePageSize } from '../../shared/utils/page-size'
+import { extractRgba } from '../services/extract-rgba'
 
 if (!parentPort) {
   throw new Error('merge.worker must run inside a worker_thread')
@@ -52,43 +53,6 @@ function sendDone(result: MergeResult): void {
 
 function sendErrorMsg(message: string): void {
   port.postMessage({ type: 'error', payload: message })
-}
-
-interface ImageDataLike {
-  data: { length: number; subarray(start: number, end: number): ArrayLike<number> }
-}
-interface CanvasLike {
-  getContext(type: '2d'): {
-    getImageData(
-      x: number,
-      y: number,
-      w: number,
-      h: number
-    ): { data: { length: number; subarray(s: number, e: number): ArrayLike<number> } }
-  }
-}
-
-function extractRgba(psd: ReturnType<typeof readPsd>): Uint8Array {
-  const { width, height } = psd
-  const expected = width * height * 4
-
-  const imageData = (psd as { imageData?: ImageDataLike }).imageData
-  if (imageData && imageData.data.length >= expected) {
-    const out = new Uint8Array(expected)
-    out.set(imageData.data.subarray(0, expected) as ArrayLike<number>)
-    return out
-  }
-
-  const canvas = (psd as { canvas?: CanvasLike }).canvas
-  if (canvas && typeof canvas.getContext === 'function') {
-    const ctx = canvas.getContext('2d')
-    const img = ctx.getImageData(0, 0, width, height)
-    const out = new Uint8Array(expected)
-    out.set(img.data.subarray(0, expected) as ArrayLike<number>)
-    return out
-  }
-
-  throw new Error('PSD has no composite image data and no reconstructable canvas (§3.8)')
 }
 
 async function processOne(
