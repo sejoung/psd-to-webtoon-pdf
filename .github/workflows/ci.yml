@@ -3,8 +3,22 @@ name: CI
 on:
   push:
     branches: [main]
+    # 문서/사이트만 바뀌었을 땐 CI 스킵 (코드와 같이 변경되면 정상 트리거).
+    # docs/site는 별도 pages.yml 워크플로우에서 배포.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.editorconfig'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.editorconfig'
 
 # 새 커밋이 푸시되면 진행 중인 같은 브랜치의 워크플로우는 취소 (PR iteration 시 비용 절약)
 concurrency:

@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSD to PDF — Download</title>
+    <meta
+      name="description"
+      content="Convert multiple Photoshop (.psd) files into a single, sequential PDF for visual review. Free, offline, cross-platform desktop utility."
+    />
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+
+    <meta property="og:title" content="PSD to PDF" />
+    <meta
+      property="og:description"
+      content="Convert multiple Photoshop (.psd) files into a single, sequential PDF for visual review."
+    />
+    <meta property="og:image" content="./icons/icon.svg" />
+    <meta property="og:type" content="website" />
+
+    <style>
+      /* ====== 디자인 시스템 토큰 (앱과 동일) ====== */
+      :root {
+        --color-bg: #18181b;
+        --color-surface: #27272a;
+        --color-surface-2: rgba(39, 39, 42, 0.6);
+        --color-border: #3f3f46;
+        --color-text-primary: #fafafa;
+        --color-text-secondary: #a1a1aa;
+
+        --color-accent: #6366f1;
+        --color-accent-hover: #4f46e5;
+
+        --color-success: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #e11d48;
+
+        --radius-card: 12px;
+        --radius-pill: 999px;
+        --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 8px rgba(0, 0, 0, 0.3);
+
+        --font-sans:
+          'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--color-bg);
+        color: var(--color-text-primary);
+        font-family: var(--font-sans);
+        font-size: 15px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      a {
+        color: var(--color-text-primary);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--color-accent);
+      }
+      code {
+        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        padding: 0.1em 0.35em;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+      }
+
+      /* ====== 레이아웃 ====== */
+      .page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 56px 24px 80px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .header__icon {
+        width: 56px;
+        height: 56px;
+      }
+      .header__title {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      .header__subtitle {
+        font-size: 13px;
+        color: var(--color-text-secondary);
+        margin: 2px 0 0;
+      }
+      .header__spacer {
+        flex: 1;
+      }
+
+      /* ====== 언어 토글 ====== */
+      .lang-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        height: 28px;
+        padding: 0 10px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        color: var(--color-text-secondary);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: border-color 0.15s, color 0.15s;
+      }
+      .lang-toggle:hover {
+        border-color: var(--color-text-secondary);
+        color: var(--color-text-primary);
+      }
+      .lang-toggle__active {
+        color: var(--color-text-primary);
+      }
+      .lang-toggle__sep {
+        opacity: 0.4;
+      }
+
+      /* ====== 섹션 ====== */
+      .section {
+        margin-top: 40px;
+      }
+      .section__title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-text-secondary);
+        margin: 0 0 12px;
+      }
+
+      /* ====== 추천 다운로드 카드 ====== */
+      .download-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 24px;
+        box-shadow: var(--shadow-card);
+      }
+      .download-card__os {
+        font-size: 13px;
+        color: var(--color-text-secondary);
+        margin: 0 0 4px;
+      }
+      .download-card__title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 6px;
+      }
+      .download-card__version {
+        font-size: 12px;
+        color: var(--color-text-secondary);
+        margin-bottom: 18px;
+      }
+      .download-card__buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .download-card__hint {
+        margin-top: 14px;
+        font-size: 12px;
+        color: var(--color-text-secondary);
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 16px;
+        border-radius: var(--radius-card);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+      }
+      .button--primary {
+        background: var(--color-accent);
+        color: var(--color-text-primary);
+        border: 1px solid var(--color-accent);
+      }
+      .button--primary:hover {
+        background: var(--color-accent-hover);
+        border-color: var(--color-accent-hover);
+        color: var(--color-text-primary);
+      }
+      .button--secondary {
+        background: transparent;
+        color: var(--color-text-primary);
+        border: 1px solid var(--color-border);
+      }
+      .button--secondary:hover {
+        border-color: var(--color-text-secondary);
+        color: var(--color-text-primary);
+      }
+      .button__size {
+        font-size: 11px;
+        color: var(--color-text-secondary);
+        margin-left: 4px;
+      }
+      .button--primary .button__size {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* ====== 다른 OS 그리드 ====== */
+      .other-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .other-card {
+        background: var(--color-surface-2);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 16px;
+      }
+      .other-card__os {
+        font-size: 12px;
+        color: var(--color-text-secondary);
+        margin: 0 0 10px;
+      }
+      .other-card__buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      /* ====== 설치 가이드 (Gatekeeper / SmartScreen / chmod) ====== */
+      .guide details {
+        background: var(--color-surface-2);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 14px 16px;
+        margin-bottom: 8px;
+      }
+      .guide details[open] {
+        background: var(--color-surface);
+      }
+      .guide summary {
+        cursor: pointer;
+        font-weight: 500;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .guide summary::-webkit-details-marker {
+        display: none;
+      }
+      .guide summary::after {
+        content: '+';
+        color: var(--color-text-secondary);
+        font-size: 18px;
+        line-height: 1;
+      }
+      .guide details[open] summary::after {
+        content: '−';
+      }
+      .guide__body {
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+      }
+      .guide__body ol {
+        padding-left: 20px;
+        margin: 0;
+      }
+      .guide__body li + li {
+        margin-top: 4px;
+      }
+      .guide__body strong {
+        color: var(--color-text-primary);
+        font-weight: 500;
+      }
+      .guide__body code {
+        color: var(--color-text-primary);
+      }
+
+      .badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: var(--radius-pill);
+        background: var(--color-surface);
+        color: var(--color-text-secondary);
+        border: 1px solid var(--color-border);
+      }
+      .badge--recommended {
+        background: rgba(99, 102, 241, 0.12);
+        color: #c7c8ff;
+        border-color: rgba(99, 102, 241, 0.4);
+      }
+
+      /* ====== 상태 메시지 ====== */
+      .notice {
+        background: var(--color-surface-2);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 14px 16px;
+        font-size: 13px;
+        color: var(--color-text-secondary);
+      }
+      .notice--error {
+        border-color: rgba(225, 29, 72, 0.4);
+        color: #ffcdd9;
+        background: rgba(225, 29, 72, 0.08);
+      }
+
+      .footer {
+        margin-top: 56px;
+        padding-top: 24px;
+        border-top: 1px solid var(--color-border);
+        font-size: 12px;
+        color: var(--color-text-secondary);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .footer a {
+        color: var(--color-text-secondary);
+      }
+      .footer a:hover {
+        color: var(--color-text-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="header">
+        <img class="header__icon" src="./icons/icon.svg" alt="" />
+        <div>
+          <h1 class="header__title">PSD to PDF</h1>
+          <p class="header__subtitle" data-i18n="tagline"></p>
+        </div>
+        <div class="header__spacer"></div>
+        <button
+          class="lang-toggle"
+          id="lang-toggle"
+          type="button"
+          aria-label="Switch language"
+        >
+          <span id="lang-ko">KO</span>
+          <span class="lang-toggle__sep">/</span>
+          <span id="lang-en">EN</span>
+        </button>
+      </header>
+
+      <section class="section" id="recommended-section">
+        <h2 class="section__title" data-i18n="download.recommendedHeading"></h2>
+        <div id="recommended-slot"></div>
+      </section>
+
+      <section class="section" id="other-section">
+        <h2 class="section__title" data-i18n="download.otherHeading"></h2>
+        <div class="other-grid" id="other-slot"></div>
+      </section>
+
+      <section class="section guide">
+        <h2 class="section__title" data-i18n="install.heading"></h2>
+
+        <details data-os="mac">
+          <summary data-i18n="install.mac.summary"></summary>
+          <div class="guide__body" data-i18n-html="install.mac.body"></div>
+        </details>
+
+        <details data-os="win">
+          <summary data-i18n="install.win.summary"></summary>
+          <div class="guide__body" data-i18n-html="install.win.body"></div>
+        </details>
+
+        <details data-os="linux">
+          <summary data-i18n="install.linux.summary"></summary>
+          <div class="guide__body" data-i18n-html="install.linux.body"></div>
+        </details>
+      </section>
+
+      <footer class="footer">
+        <span data-i18n="footer.copyright"></span>
+        <a
+          href="https://github.com/sejoung/psd-to-webtoon-pdf"
+          target="_blank"
+          rel="noopener"
+          aria-label="GitHub repository"
+          data-i18n="footer.viewSource"
+        >GitHub →</a>
+      </footer>
+    </main>
+
+    <script>
+      // ====== i18n 사전 (앱과 키 따로 관리 — 다운로드 페이지 전용 카피) ======
+      const dict = {
+        ko: {
+          'tagline': '여러 Photoshop 파일을 한 권의 PDF로 묶어 검수하세요',
+
+          'download.recommendedHeading': '추천 다운로드',
+          'download.otherHeading': '다른 OS',
+          'download.unavailable':
+            '릴리즈 정보를 불러오지 못했습니다. ',
+          'download.unavailableLink': 'GitHub Releases에서 직접 받으세요',
+          'download.osMac': 'macOS',
+          'download.osMacAppleSilicon': 'macOS (Apple Silicon)',
+          'download.osMacIntel': 'macOS (Intel)',
+          'download.osWin': 'Windows',
+          'download.osLinux': 'Linux',
+          'download.recommendedTitle': '{os} 권장',
+          'download.recommendedHint':
+            '코드 서명이 없는 빌드일 수 있습니다. 아래 설치 가이드를 확인하세요.',
+          'download.recommendedFor': '귀하의 OS:',
+          'download.versionLabel': '버전 {version} · {date}',
+          'download.detect.fail':
+            '브라우저에서 OS를 감지하지 못했습니다. 아래 목록에서 선택하세요.',
+
+          'install.heading': '설치 가이드',
+
+          'install.mac.summary': 'macOS — Gatekeeper 우회',
+          'install.mac.body': `
+            <p>Apple 공증이 안 된 빌드는 처음 실행 시 macOS가 차단합니다.</p>
+            <ol>
+              <li><strong>다운로드한 .dmg를 열어</strong> 앱을 <code>Applications</code>로 드래그.</li>
+              <li>Finder에서 앱을 <strong>우클릭 (또는 Control-클릭)</strong> → <strong>열기</strong>.</li>
+              <li>경고 창에서 <strong>열기</strong>를 한 번 더 클릭.</li>
+              <li>이 절차는 <strong>최초 1회만</strong> 필요합니다.</li>
+            </ol>
+            <p>막혔으면 시스템 설정 → 개인정보 보호 및 보안 → "그래도 열기" 버튼을 눌러도 됩니다.</p>
+          `,
+
+          'install.win.summary': 'Windows — SmartScreen 우회',
+          'install.win.body': `
+            <p>코드 서명이 없는 인스톨러는 SmartScreen이 차단합니다.</p>
+            <ol>
+              <li>인스톨러(.exe)를 더블클릭.</li>
+              <li>"Windows에서 PC를 보호했습니다" 화면이 나타나면 <strong>추가 정보</strong>를 클릭.</li>
+              <li><strong>실행</strong> 버튼이 나타납니다 — 클릭해서 설치 진행.</li>
+              <li>최초 1회만 필요합니다.</li>
+            </ol>
+          `,
+
+          'install.linux.summary': 'Linux — AppImage 실행 권한',
+          'install.linux.body': `
+            <p>다운로드한 AppImage 파일에 실행 권한을 부여한 뒤 더블클릭으로 실행합니다.</p>
+            <ol>
+              <li>터미널에서 <code>chmod +x PSD\\ to\\ PDF-x.y.z.AppImage</code> 실행.</li>
+              <li>또는 파일 매니저에서 우클릭 → 속성 → 권한 → "프로그램으로 실행 허용" 체크.</li>
+              <li>더블클릭하면 앱이 실행됩니다.</li>
+            </ol>
+          `,
+
+          'footer.copyright': '© RealDraw · Apache License 2.0',
+          'footer.viewSource': 'GitHub에서 소스 보기 →'
+        },
+        en: {
+          'tagline': 'Bundle multiple Photoshop files into one continuous PDF for review',
+
+          'download.recommendedHeading': 'Recommended download',
+          'download.otherHeading': 'Other platforms',
+          'download.unavailable': "Couldn't load release info. ",
+          'download.unavailableLink': 'Download directly from GitHub Releases',
+          'download.osMac': 'macOS',
+          'download.osMacAppleSilicon': 'macOS (Apple Silicon)',
+          'download.osMacIntel': 'macOS (Intel)',
+          'download.osWin': 'Windows',
+          'download.osLinux': 'Linux',
+          'download.recommendedTitle': 'For {os}',
+          'download.recommendedHint':
+            'This may be an unsigned build. See the install guide below.',
+          'download.recommendedFor': 'Your OS:',
+          'download.versionLabel': 'Version {version} · {date}',
+          'download.detect.fail':
+            "Couldn't detect your OS. Pick a download from the list below.",
+
+          'install.heading': 'Install guide',
+
+          'install.mac.summary': 'macOS — bypass Gatekeeper',
+          'install.mac.body': `
+            <p>Builds without Apple notarization are blocked on first launch.</p>
+            <ol>
+              <li><strong>Open the .dmg</strong> and drag the app into <code>Applications</code>.</li>
+              <li>In Finder, <strong>right-click (or Control-click)</strong> the app → <strong>Open</strong>.</li>
+              <li>Click <strong>Open</strong> again on the warning dialog.</li>
+              <li>You only need to do this <strong>once</strong>.</li>
+            </ol>
+            <p>If still blocked, go to System Settings → Privacy &amp; Security → "Open Anyway".</p>
+          `,
+
+          'install.win.summary': 'Windows — bypass SmartScreen',
+          'install.win.body': `
+            <p>Unsigned installers are blocked by SmartScreen on first launch.</p>
+            <ol>
+              <li>Double-click the installer (.exe).</li>
+              <li>When "Windows protected your PC" appears, click <strong>More info</strong>.</li>
+              <li>A <strong>Run anyway</strong> button appears — click it to continue.</li>
+              <li>One-time only.</li>
+            </ol>
+          `,
+
+          'install.linux.summary': 'Linux — make AppImage executable',
+          'install.linux.body': `
+            <p>Mark the AppImage as executable, then run it.</p>
+            <ol>
+              <li>In a terminal: <code>chmod +x PSD\\ to\\ PDF-x.y.z.AppImage</code></li>
+              <li>Or in a file manager: right-click → Properties → Permissions → check "Allow executing as program".</li>
+              <li>Double-click to launch.</li>
+            </ol>
+          `,
+
+          'footer.copyright': '© RealDraw · Apache License 2.0',
+          'footer.viewSource': 'View source on GitHub →'
+        }
+      }
+
+      const STORAGE_KEY = 'psd-pdf:site-locale'
+      const REPO = 'sejoung/psd-to-webtoon-pdf'
+      const RELEASES_URL = `https://github.com/${REPO}/releases/latest`
+      const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`
+
+      // ====== locale 결정 ======
+      let locale =
+        (() => {
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY)
+            if (saved === 'ko' || saved === 'en') return saved
+          } catch {}
+          const langs = navigator.languages?.length
+            ? navigator.languages
+            : [navigator.language || '']
+          for (const l of langs) {
+            const lower = l.toLowerCase()
+            if (lower.startsWith('ko')) return 'ko'
+            if (lower.startsWith('en')) return 'en'
+          }
+          return 'en'
+        })()
+
+      function t(key, params) {
+        let s = dict[locale][key] ?? dict.ko[key] ?? key
+        if (params) {
+          for (const [k, v] of Object.entries(params)) {
+            s = s.replaceAll(`{${k}}`, String(v))
+          }
+        }
+        return s
+      }
+
+      function applyStaticI18n() {
+        document.documentElement.lang = locale
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          el.textContent = t(el.dataset.i18n)
+        })
+        document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+          el.innerHTML = t(el.dataset.i18nHtml)
+        })
+        document.getElementById('lang-ko').classList.toggle(
+          'lang-toggle__active',
+          locale === 'ko'
+        )
+        document.getElementById('lang-en').classList.toggle(
+          'lang-toggle__active',
+          locale === 'en'
+        )
+      }
+
+      document.getElementById('lang-toggle').addEventListener('click', () => {
+        locale = locale === 'ko' ? 'en' : 'ko'
+        try {
+          localStorage.setItem(STORAGE_KEY, locale)
+        } catch {}
+        applyStaticI18n()
+        renderDownloads()
+      })
+
+      // ====== OS / 아키텍처 감지 ======
+      async function detectPlatform() {
+        let platform = ''
+        let architecture = ''
+        try {
+          if (navigator.userAgentData) {
+            const high = await navigator.userAgentData.getHighEntropyValues([
+              'platform',
+              'architecture'
+            ])
+            platform = (high.platform || '').toLowerCase()
+            architecture = (high.architecture || '').toLowerCase()
+          }
+        } catch {}
+        if (!platform) platform = (navigator.userAgent || '').toLowerCase()
+
+        let os = null
+        if (platform.includes('mac')) os = 'mac'
+        else if (platform.includes('win')) os = 'win'
+        else if (platform.includes('linux')) os = 'linux'
+
+        // mac 아키텍처: arm64 (Apple Silicon) vs x64 (Intel)
+        let macArch = null
+        if (os === 'mac') {
+          if (architecture.includes('arm')) macArch = 'arm64'
+          else if (architecture.includes('x86')) macArch = 'x64'
+          // 감지 못 하면 arm64 우선 (최근 mac 대다수)
+        }
+        return { os, macArch }
+      }
+
+      // ====== Asset 분류 ======
+      function classifyAssets(assets) {
+        const byPlatform = { mac: [], win: [], linux: [] }
+        for (const a of assets) {
+          const lower = a.name.toLowerCase()
+          if (lower.endsWith('.dmg')) {
+            const arch = lower.includes('arm64')
+              ? 'arm64'
+              : lower.includes('x64') || lower.includes('intel')
+                ? 'x64'
+                : 'arm64' // 기본 arm64
+            byPlatform.mac.push({ ...a, arch })
+          } else if (lower.endsWith('.exe')) {
+            byPlatform.win.push({ ...a, arch: 'x64' })
+          } else if (lower.endsWith('.appimage')) {
+            byPlatform.linux.push({ ...a, arch: 'x64' })
+          }
+        }
+        return byPlatform
+      }
+
+      function formatBytes(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) return ''
+        const units = ['B', 'KB', 'MB', 'GB']
+        let v = bytes
+        let i = 0
+        while (v >= 1024 && i < units.length - 1) {
+          v /= 1024
+          i++
+        }
+        return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`
+      }
+
+      function osLabel(os, arch) {
+        if (os === 'mac') {
+          if (arch === 'arm64') return t('download.osMacAppleSilicon')
+          if (arch === 'x64') return t('download.osMacIntel')
+          return t('download.osMac')
+        }
+        if (os === 'win') return t('download.osWin')
+        if (os === 'linux') return t('download.osLinux')
+        return os
+      }
+
+      // ====== 렌더 ======
+      let cachedRelease = null
+      let cachedPlatform = null
+
+      function renderDownloads() {
+        const recSlot = document.getElementById('recommended-slot')
+        const otherSlot = document.getElementById('other-slot')
+
+        if (!cachedRelease) {
+          recSlot.innerHTML = `
+            <div class="notice notice--error">
+              ${t('download.unavailable')}<a href="${RELEASES_URL}" target="_blank" rel="noopener">${t('download.unavailableLink')}</a>.
+            </div>
+          `
+          otherSlot.innerHTML = ''
+          return
+        }
+
+        const { version, date, byPlatform } = cachedRelease
+        const detectedOS = cachedPlatform?.os
+        const macArch = cachedPlatform?.macArch ?? 'arm64'
+
+        // 1) 추천 카드
+        const recAssets = detectedOS ? byPlatform[detectedOS] : []
+        if (detectedOS && recAssets.length > 0) {
+          const ordered = orderForOS(recAssets, detectedOS, macArch)
+          const buttons = ordered
+            .map(
+              (a, idx) => `
+              <a class="button ${idx === 0 ? 'button--primary' : 'button--secondary'}"
+                 href="${a.browser_download_url}" rel="noopener">
+                <span>${osLabel(detectedOS, a.arch)}</span>
+                <span class="button__size">${formatBytes(a.size)}</span>
+              </a>
+            `
+            )
+            .join('')
+          recSlot.innerHTML = `
+            <div class="download-card">
+              <p class="download-card__os">
+                <span class="badge badge--recommended">${t('download.recommendedFor')} ${osLabel(detectedOS)}</span>
+              </p>
+              <h3 class="download-card__title">
+                ${t('download.recommendedTitle', { os: osLabel(detectedOS) })}
+              </h3>
+              <p class="download-card__version">
+                ${t('download.versionLabel', { version, date })}
+              </p>
+              <div class="download-card__buttons">${buttons}</div>
+              <p class="download-card__hint">${t('download.recommendedHint')}</p>
+            </div>
+          `
+        } else {
+          recSlot.innerHTML = `
+            <div class="notice">${t('download.detect.fail')}</div>
+          `
+        }
+
+        // 2) 다른 OS
+        const otherCards = []
+        for (const os of ['mac', 'win', 'linux']) {
+          if (os === detectedOS) continue
+          const assets = byPlatform[os] ?? []
+          if (assets.length === 0) continue
+          const ordered = orderForOS(assets, os, macArch)
+          const btns = ordered
+            .map(
+              (a) => `
+              <a class="button button--secondary"
+                 href="${a.browser_download_url}" rel="noopener">
+                <span>${osLabel(os, a.arch)}</span>
+                <span class="button__size">${formatBytes(a.size)}</span>
+              </a>
+            `
+            )
+            .join('')
+          otherCards.push(`
+            <div class="other-card">
+              <p class="other-card__os">${osLabel(os)}</p>
+              <div class="other-card__buttons">${btns}</div>
+            </div>
+          `)
+        }
+        otherSlot.innerHTML = otherCards.join('')
+      }
+
+      function orderForOS(assets, os, macArch) {
+        if (os !== 'mac') return assets
+        // mac은 사용자 아키텍처를 우선
+        return [...assets].sort((a, b) => {
+          if (a.arch === macArch && b.arch !== macArch) return -1
+          if (b.arch === macArch && a.arch !== macArch) return 1
+          return 0
+        })
+      }
+
+      // ====== 데이터 로드 ======
+      async function loadRelease() {
+        try {
+          const res = await fetch(API_URL, {
+            headers: { Accept: 'application/vnd.github+json' }
+          })
+          if (!res.ok) return null
+          const data = await res.json()
+          return {
+            version: (data.tag_name || '').replace(/^v/, ''),
+            date: new Date(data.published_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            }),
+            byPlatform: classifyAssets(data.assets || [])
+          }
+        } catch {
+          return null
+        }
+      }
+
+      // ====== 부트 ======
+      ;(async () => {
+        applyStaticI18n()
+        cachedPlatform = await detectPlatform()
+        cachedRelease = await loadRelease()
+        renderDownloads()
+      })()
+    </script>
+  </body>
+</html>

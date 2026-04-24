@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <a href="https://sejoung.github.io/psd-to-webtoon-pdf/"><strong>↓ Download for your OS</strong></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/sejoung/psd-to-webtoon-pdf/actions/workflows/ci.yml"><img src="https://github.com/sejoung/psd-to-webtoon-pdf/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
   <a href="https://github.com/sejoung/psd-to-webtoon-pdf/releases/latest"><img src="https://img.shields.io/github/v/release/sejoung/psd-to-webtoon-pdf?include_prereleases&sort=semver&label=release&color=6366F1" alt="Latest release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License: Apache 2.0" /></a>
