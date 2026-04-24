@@ -8,6 +8,14 @@
   Convert multiple Photoshop (<code>.psd</code>) files into a single, sequential PDF for visual review.
 </p>
 
+<p align="center">
+  <a href="https://github.com/sejoung/psd-to-webtoon-pdf/actions/workflows/ci.yml"><img src="https://github.com/sejoung/psd-to-webtoon-pdf/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
+  <a href="https://github.com/sejoung/psd-to-webtoon-pdf/releases/latest"><img src="https://img.shields.io/github/v/release/sejoung/psd-to-webtoon-pdf?include_prereleases&sort=semver&label=release&color=6366F1" alt="Latest release" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License: Apache 2.0" /></a>
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" alt="Platforms" />
+  <img src="https://img.shields.io/badge/Electron-41-47848F?logo=electron&logoColor=white" alt="Electron 41" />
+</p>
+
 Built for webtoon/comic creators, illustrators, and editors who need to review batches of PSD files without opening Photoshop one by one.
 
 ## Highlights

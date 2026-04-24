@@ -42,6 +42,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     # 정상 ~10-15분 (electron 116MB 다운로드 + native rebuild + electron-builder).
     timeout-minutes: 25
+    # secrets는 step level if에서 직접 참조 불가 — job env에서 한 번 평가해
+    # 나머지 step에서 env 비교로 사용한다.
+    env:
+      HAS_MAC_SIGNING: ${{ secrets.MAC_CSC_LINK != '' }}
+      HAS_WIN_SIGNING: ${{ secrets.WIN_CSC_LINK != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,26 +74,37 @@ jobs:
       - name: Build app (electron-vite)
         run: npm run build
 
-      # macOS: dmg 생성. CSC_LINK가 secrets에 있으면 서명, 없으면 ad-hoc.
-      - name: Package — macOS
-        if: matrix.os == 'macos-latest'
+      # macOS: secrets에 인증서 있으면 서명 빌드, 없으면 ad-hoc 빌드.
+      # 빈 CSC_LINK를 넘기면 electron-builder가 빈 문자열을 파일 경로로 해석하다 죽으므로
+      # 두 step을 분리하고, 서명 안 할 때는 CSC_LINK 자체를 env에 넣지 않는다.
+      - name: Package — macOS (signed)
+        if: matrix.os == 'macos-latest' && env.HAS_MAC_SIGNING == 'true'
         run: npx electron-builder --mac --publish never
         env:
           CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
-          # secrets 미설정 시 자동 ID 탐색을 끄고 ad-hoc로 진행
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CSC_LINK != '' && 'true' || 'false' }}
           # 공증은 별도 secrets가 모두 있을 때만. (미설정 시 electron-builder.yml의 notarize:false가 우선)
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
-      - name: Package — Windows
-        if: matrix.os == 'windows-latest'
+      - name: Package — macOS (unsigned, ad-hoc)
+        if: matrix.os == 'macos-latest' && env.HAS_MAC_SIGNING == 'false'
+        run: npx electron-builder --mac --publish never
+        env:
+          # 키체인의 자동 ID 탐색 끄고 ad-hoc 서명으로 진행 (Gatekeeper 경고 발생)
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Package — Windows (signed)
+        if: matrix.os == 'windows-latest' && env.HAS_WIN_SIGNING == 'true'
         run: npx electron-builder --win --publish never
         env:
           CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+
+      - name: Package — Windows (unsigned)
+        if: matrix.os == 'windows-latest' && env.HAS_WIN_SIGNING == 'false'
+        run: npx electron-builder --win --publish never
 
       - name: Package — Linux
         if: matrix.os == 'ubuntu-latest'

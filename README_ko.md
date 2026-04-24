@@ -8,6 +8,14 @@
   여러 장의 Photoshop(<code>.psd</code>) 파일을 한 묶음 PDF로 병합하는 데스크톱 유틸리티입니다.
 </p>
 
+<p align="center">
+  <a href="https://github.com/sejoung/psd-to-webtoon-pdf/actions/workflows/ci.yml"><img src="https://github.com/sejoung/psd-to-webtoon-pdf/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
+  <a href="https://github.com/sejoung/psd-to-webtoon-pdf/releases/latest"><img src="https://img.shields.io/github/v/release/sejoung/psd-to-webtoon-pdf?include_prereleases&sort=semver&label=release&color=6366F1" alt="Latest release" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License: Apache 2.0" /></a>
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" alt="Platforms" />
+  <img src="https://img.shields.io/badge/Electron-41-47848F?logo=electron&logoColor=white" alt="Electron 41" />
+</p>
+
 웹툰/만화 제작자, 일러스트레이터, 편집자가 회차 분량 PSD를 PDF로 정리해 클라이언트 검수, 플랫폼 업로드 전 사전 정리, 프린트 샘플 생성 용도로 사용합니다.
 
 ## 핵심 특징
