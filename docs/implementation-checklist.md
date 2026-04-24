@@ -98,38 +98,37 @@
 - [x] `src/shared/utils/natural-sort.ts` (`Intl.Collator` 기반)
 - [x] `src/shared/utils/format-bytes.ts` (B/KB/MB/GB/TB)
 - [x] `src/shared/utils/path.ts` (renderer/main 공용 basename — node:path 의존 없음)
-- [ ] 두 유틸에 대한 Vitest 단위 테스트 (Phase 8.1에서 도입)
+- [x] 두 유틸에 대한 Vitest 단위 테스트 (Phase 8.1에서 도입 완료)
 
 ---
 
 ## Phase 3 — UI: 파일 목록 + 옵션 패널
 
 ### 3.1 FileList / FileRow
-- [ ] `FileList.tsx` (Card 스타일, scroll)
-- [ ] `FileRow.tsx` 한 행: ▲ ▼ / 파일명 / 사이즈 / [x] 제거
-- [ ] 행 hover 상태 (살짝 밝은 배경 — 디자인 시스템 §7)
-- [ ] [+ 추가] 버튼 → 파일 다이얼로그 열고 중복 제거 후 append
+- [x] `FileList.tsx` (Card 스타일, scroll)
+- [x] `FileRow.tsx` 한 행: ▲ ▼ / 파일명 / 사이즈 / [x] 제거
+- [x] 행 hover 상태 (살짝 밝은 배경 — 디자인 시스템 §7)
+- [x] [+ 추가] 버튼 → 파일 다이얼로그 열고 중복 제거 후 append
 
 ### 3.2 OptionsPanel
-- [ ] 임베드 포맷 라디오: JPEG (slider 60–100, 기본 95) / PNG
-- [ ] 페이지 크기 라디오: 자동(원본) / 고정 너비 + 숫자 입력 (기본 690)
-- [ ] 페이지 간 여백 입력 (px, 기본 0)
-- [ ] 오류 발생 시 라디오: 계속 진행(skip) / 중단(abort)
-- [ ] 옵션 상태도 `mergeStore` 또는 별도 스토어에 보관
+- [x] 임베드 포맷 라디오: JPEG (slider 60–100, 기본 95) / PNG
+- [x] 페이지 크기 라디오: 자동(원본) / 고정 너비 + 숫자 입력 (기본 690)
+- [x] 페이지 간 여백 입력 (px, 기본 0)
+- [x] 오류 발생 시 라디오: 계속 진행(skip) / 중단(abort)
+- [x] 옵션 상태도 `mergeStore`에 보관
 
 ### 3.3 액션 영역
-- [ ] [목록 비우기] 버튼 (확인 모달 없이도 OK — store.clear)
-- [ ] [PDF 생성 →] 버튼
+- [x] [목록 비우기] 버튼 (확인 모달 없이도 OK — store.clear)
+- [x] [PDF 생성 →] 버튼
   - 활성화 조건: `files.length >= 1` (1 PSD = 1 PDF 페이지도 정상 결과)
   - 클릭 시 `selectOutputPdf({ defaultName })` 호출
   - 사용자가 경로 선택 시 Phase 4의 `startMerge` 호출
 
 ### 3.4 디자인 시스템 컴포넌트화
-- [ ] `Button` (primary / secondary / danger)
-- [ ] `Card` (Surface 컬러, radius 12, subtle shadow)
-- [ ] `Slider` (JPEG quality)
-- [ ] `Input` (text / number)
-- [ ] `Toast` 인프라 (zustand 기반 큐)
+- [x] `Button` (primary / secondary / danger / ghost)
+- [x] `Card` + `CardHeader` + `CardBody` (Surface 컬러, radius 12, subtle shadow)
+- [x] `Toast` 인프라 (zustand 기반 큐 + `Toaster` 렌더러)
+- 의도적 미작성: `Slider` / `Input` 별도 컴포넌트 — 현재는 OptionsPanel 안의 native `<input type="range" / "number">`로 충분. 사용처가 늘어나면 컴포넌트로 추출.
 
 ---
 
@@ -138,21 +137,22 @@
 > ⚠️ Spec §3 의 11가지 함정을 작업 시작 전 반드시 재확인.
 
 ### 4.1 의존성 설치
-- [ ] `ag-psd`
-- [ ] `@napi-rs/canvas`
-- [ ] `sharp` (`^0.34`)
-- [ ] `pdfkit`
-- [ ] `uuid`
-- [ ] electron-builder 설정에서 `sharp`, `@napi-rs/canvas` `asarUnpack` 예약
+- [x] `ag-psd`
+- [x] `@napi-rs/canvas`
+- [x] `sharp` (`^0.34`)
+- [x] `pdfkit`
+- [x] `uuid`
+- [x] electron-builder 설정에서 `sharp`, `@napi-rs/canvas` `asarUnpack` 예약 (`@img/**` 추가)
 
 ### 4.2 worker 스폰 인프라
-- [ ] `src/main/workers/merge.worker.ts` (worker_threads 진입점)
-- [ ] `src/main/services/merge-orchestrator.ts`
+- [x] `src/main/workers/merge.worker.ts` (worker_threads 진입점)
+- [x] `src/main/services/merge-orchestrator.ts`
   - 워커 경로 후보 배열 + `fs.existsSync` 검사 (spec §3.10 회피)
   - jobId별 worker 인스턴스 관리 (cancel 신호용)
   - worker `message` → `webContents.send('merge-progress', ...)` 릴레이
-  - `worker.on('exit', code)` 비정상 종료 감지 → 사용자에게 토스트 (spec §10 #12)
-- [ ] `start-merge` 핸들러 본 구현, `cancel-merge` 핸들러 본 구현
+  - `worker.on('exit', code)` 비정상 종료 감지 + 'done' 메시지 즉시 resolve + `worker.terminate()`
+- [x] `start-merge` 핸들러 본 구현, `cancel-merge` 핸들러 본 구현
+- [x] `spawnMergeWorker` 분리로 통합 테스트 가능 (electron 의존 없이 spawn)
 
 ### 4.3 워커 본체 — 초기화
 - [x] `initializeCanvas(createCanvas)` (ag-psd fallback 대비 — §3.8)
@@ -228,7 +228,7 @@
 - [x] #4 접근 권한 없음 → statFiles는 size=null, 워커는 readFile 실패 → onError 정책
 - [x] #5 손상된 PSD → onError 정책대로 (워커 try/catch 분기)
 - [x] #6 composite/layers 둘 다 없는 PSD → extractRgba throw → 스킵/중단
-- [ ] #7 PSB 입력 → ag-psd가 일반 에러로 처리 (전용 안내는 v0.2 백로그)
+- [x] #7 PSB 입력 → 매직 바이트 사전 검사로 식별 → "PSB는 아직 지원하지 않습니다" 안내 (`detectPsdKind`)
 - [x] #8 디스크 공간 부족 → write error 캐치 + 부분 파일 삭제 (워커 finally)
 - [x] #9 사용자 취소 → 부분 파일 삭제 (4.7에서 처리)
 - [x] #10 저장 경로 덮어쓰기 → OS 다이얼로그에 위임 (별도 처리 불필요)
@@ -299,14 +299,14 @@
 - [x] mac dmg (x64 + arm64) + dmg 레이아웃
 - [x] win nsis (x64) — 사용자 디렉터리 선택 허용
 - [x] linux AppImage (x64)
-- [ ] `build/icon.icns`, `build/icon.ico`, `build/icon.png` 디자인 후 배치 (수동)
+- [x] 아이콘 자동 생성 (`docs/icons/icon.svg` → `resources/icons/icon.{icns,ico,png}` via `npm run build:icons`) — 한 번 생성 후 커밋, 디자인 변경 시에만 재실행
 
 ### 9.2 코드 서명 — **사용자 환경 의존**
 - [ ] macOS: Developer ID 서명 + notarization (CI 시크릿: `CSC_LINK`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`)
 - [ ] Windows: 인증서 있을 시 서명 / 없으면 SmartScreen 안내 README
 
 ### 9.3 첫 릴리스
-- [ ] GitHub Actions: lint / test / build 매트릭스 (mac, win)
+- [x] GitHub Actions: lint / typecheck / unit / build / integration 매트릭스 (ubuntu + macOS) + macOS package smoke (`.github/workflows/ci.yml`)
 - [ ] tag 푸시 → release 자동 업로드 (artifacts: dmg, exe)
 - [ ] README / README_ko 사용법 + 스크린샷
 - [ ] 릴리스 노트 v0.1.0

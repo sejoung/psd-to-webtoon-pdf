@@ -22,6 +22,7 @@ import PDFDocument from 'pdfkit'
 import sharp from 'sharp'
 import type { MergeProgress, MergeRequest, MergeResult } from '../../shared/types/index'
 import { computePageSize } from '../../shared/utils/page-size'
+import { detectPsdKind } from '../../shared/utils/psd-format'
 import { extractRgba } from '../services/extract-rgba'
 
 if (!parentPort) {
@@ -63,6 +64,20 @@ async function processOne(
   const fileName = basename(filePath)
   // 한 이터레이션의 모든 임시 변수를 함수 스코프에 가두어 종료 시 GC 대상이 되도록.
   const fileBuf = await readFile(filePath)
+
+  // §10 #7: PSB는 ag-psd가 일관되게 처리하지 못함. 친절한 에러로 사전 거부.
+  const kind = detectPsdKind(fileBuf)
+  if (kind === 'psb') {
+    throw new Error(
+      `${fileName}은(는) PSB 형식입니다. PSB(대형 PSD)는 아직 지원하지 않습니다 — Photoshop에서 PSD로 다시 저장한 뒤 시도해 주세요.`
+    )
+  }
+  if (kind === 'unknown') {
+    throw new Error(
+      `${fileName}은(는) 유효한 PSD 파일이 아닙니다 (시그니처 8BPS 불일치).`
+    )
+  }
+
   const psd = readPsd(fileBuf, {
     useImageData: true,
     skipLayerImageData: true,
