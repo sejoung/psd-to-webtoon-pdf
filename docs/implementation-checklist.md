@@ -13,93 +13,96 @@
 ## Phase 0 — 프로젝트 부트스트랩
 
 ### 0.1 저장소 / 도구 체인
-- [ ] `package.json` 초기화 (`name`, `version 0.0.1`, `private: true`, `type: "module"`)
-- [ ] `.nvmrc` 또는 `engines.node` 설정 (LTS, Node 20+)
-- [ ] `.editorconfig` 점검 (이미 추가됨 — UTF-8, LF, 2 spaces 확인)
-- [ ] `.gitignore`에 `node_modules/`, `dist/`, `dist-electron/`, `release/`, `.DS_Store`, `*.log` 포함
-- [ ] `LICENSE` 추가 (MIT 권장 — spec 12장)
-- [ ] `README.md` / `README_ko.md` 스켈레톤
+- [x] `package.json` 초기화 (`name`, `version 0.0.1`, `private: true`, `type: "module"`)
+- [x] `.nvmrc` 또는 `engines.node` 설정 (LTS, Node 20+)
+- [x] `.editorconfig` 점검 (이미 추가됨 — UTF-8, LF, 2 spaces 확인)
+- [x] `.gitignore`에 `node_modules/`, `dist/`, `dist-electron/`, `release/`, `.DS_Store`, `*.log` 포함
+- [x] `LICENSE` 추가 (Apache-2.0 — spec §16.4 호환)
+- [x] `README.md` / `README_ko.md` 스켈레톤
 
 ### 0.2 Electron + Vite + TypeScript 스캐폴딩
-- [ ] `electron`, `electron-vite`, `vite` 설치
-- [ ] `electron.vite.config.ts` 작성 (main / preload / renderer 3-entry)
-- [ ] `tsconfig.json` (베이스, strict 모드)
-- [ ] `tsconfig.node.json` (main/preload용 — Node libs)
-- [ ] `tsconfig.web.json` (renderer용 — DOM libs)
-- [ ] `npm run dev` 으로 빈 BrowserWindow가 뜨는지 확인
+- [x] `electron`, `electron-vite`, `vite` 설치 (electron@41, electron-vite@5, vite@7)
+- [x] `electron.vite.config.ts` 작성 (main / preload / renderer 3-entry, preload는 sandbox 호환 위해 CJS)
+- [x] `tsconfig.json` (베이스, strict 모드)
+- [x] `tsconfig.node.json` (main/preload용 — Node libs)
+- [x] `tsconfig.web.json` (renderer용 — DOM libs)
+- [x] `npm run dev` 으로 빈 BrowserWindow가 뜨는지 확인
 
 ### 0.3 React + 디자인 시스템 토대
-- [ ] `react@19`, `react-dom@19` 설치
-- [ ] `tailwindcss@4` 설치 + 설정
-- [ ] Tailwind 토큰을 디자인 시스템에 매핑
+- [x] `react@19`, `react-dom@19` 설치
+- [x] `tailwindcss@4` 설치 + 설정 (`@tailwindcss/vite` 플러그인)
+- [x] Tailwind 토큰을 디자인 시스템에 매핑 (CSS `@theme` 디렉티브)
   - `bg`: `#18181B` / `surface`: `#27272A` / `border`: `#3F3F46`
   - `text-primary`: `#FAFAFA` / `text-secondary`: `#A1A1AA`
   - `accent`: `#6366F1` / `accent-hover`: `#4F46E5`
   - `success`: `#10B981` / `warning`: `#F59E0B` / `error`: `#E11D48`
-- [ ] `Inter` 폰트 로드 (또는 `system-ui`)
-- [ ] 기본 라디우스 12px, base spacing 8px 설정
-- [ ] `lucide-react` 설치 (디자인 시스템 §8)
-- [ ] 다크모드 기본 적용된 빈 화면 확인
+- [x] `Inter` 폰트 로드 (`@fontsource-variable/inter` — 오프라인 번들)
+- [x] 기본 라디우스 12px, base spacing 8px 설정
+- [x] `lucide-react` 설치 (디자인 시스템 §8)
+- [x] 다크모드 기본 적용된 빈 화면 확인
 
 ### 0.4 폴더 구조 잡기
-- [ ] `src/main/` (index.ts, ipc/, services/, workers/)
-- [ ] `src/preload/` (index.ts)
-- [ ] `src/renderer/` (index.html, src/app/, components/, hooks/, i18n/, pages/, stores/)
-- [ ] `src/shared/` (types/, utils/)
-- [ ] `resources/`, `build/`, `scripts/` 빈 디렉터리 + `.gitkeep`
+- [x] `src/main/` (index.ts, ipc/, services/, workers/)
+- [x] `src/preload/` (index.ts)
+- [x] `src/renderer/` (index.html, src/app/, components/, hooks/, i18n/, pages/, stores/)
+- [x] `src/shared/` (types/, utils/)
+- [x] `resources/`, `build/`, `scripts/` 빈 디렉터리 + `.gitkeep`
 
 ---
 
 ## Phase 1 — IPC 배선과 공유 타입
 
 ### 1.1 공유 타입 정의 (`src/shared/types/index.ts`)
-- [ ] `EmbedOption`, `PageSizeOption`, `MergeOptions`
-- [ ] `MergeRequest`, `MergeProgress`, `MergeResult`
-- [ ] `MergeProgress.phase` 유니온: `init | parse | encode | write | finalize | done | cancelled | error`
+- [x] `EmbedOption`, `PageSizeOption`, `MergeOptions`
+- [x] `MergeRequest`, `MergeProgress`, `MergeResult`
+- [x] `MergeProgress.phase` 유니온: `init | parse | encode | write | finalize | done | cancelled | error`
+- [x] `DEFAULT_MERGE_OPTIONS` 상수 추가 (UI 초기값 공유용)
 
 ### 1.2 Preload contextBridge
-- [ ] `src/preload/index.ts` 에 `api` 객체 노출
-- [ ] 메서드: `selectPsdFiles`, `selectOutputPdf`, `startMerge`, `cancelMerge`, `onMergeProgress`, `openPath`, `showInFolder`
-- [ ] `Api` 타입 export → renderer가 `window.api` 타입 추론 가능하도록 `src/renderer/src/types/global.d.ts` 작성
+- [x] `src/preload/index.ts` 에 `api` 객체 노출
+- [x] 메서드: `selectPsdFiles`, `selectOutputPdf`, `startMerge`, `cancelMerge`, `onMergeProgress`, `openPath`, `showInFolder`
+- [x] `Api` 타입 export → renderer가 `window.api` 타입 추론 가능하도록 `src/renderer/src/types/global.d.ts` 작성
 
 ### 1.3 Main 측 IPC 핸들러
-- [ ] `src/main/ipc/handlers.ts` — 채널 등록 (spec §7.2 표 기준)
-- [ ] `select-psd-files`: `dialog.showOpenDialog` (`.psd` 필터, multiSelections)
-- [ ] `select-output-pdf`: `dialog.showSaveDialog` (`.pdf`, defaultName)
-- [ ] `open-path`: `shell.openPath`
-- [ ] `show-in-folder`: `shell.showItemInFolder`
-- [ ] `start-merge`, `cancel-merge`: 우선 stub (Phase 4에서 워커와 연결)
+- [x] `src/main/ipc/handlers.ts` — 채널 등록 (spec §7.2 표 기준)
+- [x] `select-psd-files`: `dialog.showOpenDialog` (`.psd` 필터, multiSelections)
+- [x] `select-output-pdf`: `dialog.showSaveDialog` (`.pdf`, defaultName)
+- [x] `open-path`: `shell.openPath`
+- [x] `show-in-folder`: `shell.showItemInFolder`
+- [x] `start-merge`, `cancel-merge`: 우선 stub (Phase 4에서 워커와 연결)
 
 ### 1.4 BrowserWindow 보안 기본
-- [ ] `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`
-- [ ] `webSecurity: true` (개발 중에도)
-- [ ] CSP 메타 태그 (`renderer/index.html`)
-- [ ] 외부 URL 차단 (`win.webContents.setWindowOpenHandler`)
+- [x] `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`
+- [x] `webSecurity: true` (개발 중에도)
+- [x] CSP 메타 태그 (`renderer/index.html`)
+- [x] 외부 URL 차단 (`win.webContents.setWindowOpenHandler`)
+- [x] 인앱 navigation 차단 (`will-navigate`) + 권한 요청 일괄 거부
 
 ---
 
 ## Phase 2 — UI: 빈 상태 / 드롭존
 
 ### 2.1 라우팅 / 페이지 셸
-- [ ] `App.tsx` + `MergePage.tsx` 빈 컨테이너
-- [ ] Zustand 스토어 `mergeStore.ts`
-  - `files: { path: string; name: string; size: number }[]`
+- [x] `App.tsx` + `MergePage.tsx` 컨테이너
+- [x] Zustand 스토어 `mergeStore.ts`
+  - `files: { path: string; name: string; size: number | null }[]`
   - `phase: 'idle' | 'configuring' | 'merging' | 'completed' | 'cancelled' | 'error'`
-  - `addFiles`, `removeFile`, `moveUp`, `moveDown`, `clear`
-- [ ] 다크모드 기본 배경 + 헤더 (제품명만)
+  - `addFiles`, `removeFile`, `moveUp`, `moveDown`, `clearFiles`, `setOptions`, `resetSession`
+- [x] 다크모드 기본 배경 + 헤더 (제품명 + 부제목)
 
 ### 2.2 DropZone 컴포넌트
-- [ ] `useFileDrop` 훅 (HTML5 drag/drop + `.psd` 확장자 필터)
-- [ ] 드래그 오버 시 강조 상태 (border accent)
-- [ ] "또는 [파일 선택]" 버튼 → `window.api.selectPsdFiles()` 호출
-- [ ] 빈 상태 안내 문구 ("최소 2개 이상의 .psd 파일이 필요합니다")
-- [ ] 드롭된 파일을 store에 push
-- [ ] 자연정렬(`natural-sort.ts`)로 초기 정렬
+- [x] `useFileDrop` 훅 (HTML5 drag/drop + `.psd` 확장자 필터, `webUtils.getPathForFile` 경유)
+- [x] 드래그 오버 시 강조 상태 (border accent)
+- [x] "[파일 선택]" 버튼 → `window.api.selectPsdFiles()` 호출
+- [x] 빈 상태 안내 문구 ("한 개부터 시작할 수 있어요" — 1개도 정상 처리)
+- [x] 드롭된 파일을 store에 push (사이즈 stat은 `statFiles` IPC로 비동기 조회)
+- [x] 자연정렬(`natural-sort.ts`)로 초기 정렬
 
 ### 2.3 공통 유틸
-- [ ] `src/shared/utils/natural-sort.ts` (숫자/문자 혼합 자연정렬)
-- [ ] `src/shared/utils/format-bytes.ts` (B/KB/MB/GB)
-- [ ] 두 유틸에 대한 Vitest 단위 테스트
+- [x] `src/shared/utils/natural-sort.ts` (`Intl.Collator` 기반)
+- [x] `src/shared/utils/format-bytes.ts` (B/KB/MB/GB/TB)
+- [x] `src/shared/utils/path.ts` (renderer/main 공용 basename — node:path 의존 없음)
+- [ ] 두 유틸에 대한 Vitest 단위 테스트 (Phase 8.1에서 도입)
 
 ---
 
@@ -121,7 +124,7 @@
 ### 3.3 액션 영역
 - [ ] [목록 비우기] 버튼 (확인 모달 없이도 OK — store.clear)
 - [ ] [PDF 생성 →] 버튼
-  - 활성화 조건: `files.length >= 2`
+  - 활성화 조건: `files.length >= 1` (1 PSD = 1 PDF 페이지도 정상 결과)
   - 클릭 시 `selectOutputPdf({ defaultName })` 호출
   - 사용자가 경로 선택 시 Phase 4의 `startMerge` 호출
 
@@ -224,7 +227,7 @@
 
 > spec §10 매트릭스를 기준으로 항목 단위 검증.
 
-- [ ] #1 1개만 드롭 → "최소 2개 필요" 토스트
+- [ ] #1 1개만 드롭 → 정상 추가 (1 PSD = 1 PDF 페이지도 유효한 결과 → spec §10 #1 강제는 제거)
 - [ ] #2 PSD가 아닌 파일 혼합 드롭 → 무시 + "N개 무시됨" 토스트
 - [ ] #3 동일 경로 중복 → 자동 dedupe
 - [ ] #4 접근 권한 없음 → 토스트 + 항목 경고

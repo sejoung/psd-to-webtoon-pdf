@@ -1,6 +1,7 @@
-import { app, BrowserWindow, shell } from 'electron'
-import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { app, BrowserWindow, shell } from 'electron'
+import { registerIpcHandlers } from './ipc/handlers'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -30,6 +31,20 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
+  // 인앱 navigation 차단: 허용된 dev URL 또는 file:// 만 통과
+  win.webContents.on('will-navigate', (event, url) => {
+    const allowed =
+      (process.env.ELECTRON_RENDERER_URL &&
+        url.startsWith(process.env.ELECTRON_RENDERER_URL)) ||
+      url.startsWith('file://')
+    if (!allowed) event.preventDefault()
+  })
+
+  // 모든 권한 요청 거부 (마이크/카메라/위치 등 — 본 앱 무관)
+  win.webContents.session.setPermissionRequestHandler((_wc, _perm, callback) => {
+    callback(false)
+  })
+
   if (process.env.ELECTRON_RENDERER_URL) {
     win.loadURL(process.env.ELECTRON_RENDERER_URL)
   } else {
@@ -38,6 +53,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  registerIpcHandlers()
   createWindow()
 
   app.on('activate', () => {

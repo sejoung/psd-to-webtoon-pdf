@@ -1,0 +1,73 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.13/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/out",
+      "!**/dist",
+      "!**/dist-electron",
+      "!**/release",
+      "!**/coverage",
+      "!**/.idea",
+      "!**/build/icon.*",
+      "!**/resources"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 90,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "semicolons": "asNeeded",
+      "trailingCommas": "none",
+      "arrowParentheses": "always",
+      "bracketSpacing": true
+    }
+  },
+  "json": {
+    "formatter": {
+      "indentWidth": 2,
+      "trailingCommas": "none"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": false,
+      "allowWrongLineComments": false,
+      "tailwindDirectives": true
+    },
+    "formatter": {
+      "enabled": true,
+      "quoteStyle": "single"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "useImportType": "warn",
+        "noNonNullAssertion": "warn"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedImports": "warn"
+      }
+    }
+  }
+}
