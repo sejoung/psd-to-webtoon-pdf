@@ -1,6 +1,7 @@
 import { stat } from 'node:fs/promises'
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import type { MergeRequest, MergeResult } from '../../shared/types/index'
+import { cancelMerge, runMerge } from '../services/merge-orchestrator'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('select-psd-files', async (event): Promise<string[]> => {
@@ -31,15 +32,15 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle(
     'start-merge',
-    async (_event, _req: MergeRequest): Promise<MergeResult> => {
-      throw new Error('start-merge not implemented yet (Phase 4)')
+    async (event, req: MergeRequest): Promise<MergeResult> => {
+      return runMerge(req, event.sender)
     }
   )
 
   ipcMain.handle(
     'cancel-merge',
-    async (_event, _payload: { jobId: string }): Promise<boolean> => {
-      return false
+    async (_event, payload: { jobId: string }): Promise<boolean> => {
+      return cancelMerge(payload.jobId)
     }
   )
 

@@ -148,3 +148,6 @@ playwright-report/
 test-results/
 test/fixtures/pdfs/
 .DS_Store
+
+# Vitest coverage
+coverage/

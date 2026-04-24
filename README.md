@@ -23,8 +23,42 @@ Built for webtoon/comic creators, illustrators, and editors who need to review b
 
 ```bash
 npm install
-npm run dev
+npm run dev          # Electron dev server with HMR
 ```
+
+### Quality scripts
+
+```bash
+npm run verify        # Biome lint+format check + tsc + Vitest
+npm run check:fix     # Auto-fix Biome issues (lint, format, import order)
+npm run test          # Vitest run once
+npm run test:watch    # Vitest in watch mode
+```
+
+### Package (electron-builder)
+
+Platform icons live in `resources/icons/` (`icon.icns`, `icon.ico`, `icon.png`) and are committed to the repo, so packaging works out of the box.
+
+When the source SVG (`docs/icons/icon.svg`) changes, regenerate them:
+
+```bash
+npm run build:icons
+```
+
+> `.icns` requires macOS (`iconutil`). On other platforms only `.ico` and `.png` are emitted — re-run on macOS to refresh `.icns`.
+
+```bash
+npm run package        # current OS
+npm run package:mac    # dmg (arm64 + x64)
+npm run package:win    # nsis installer
+npm run package:linux  # AppImage
+npm run package:dir    # unpacked directory (fast, no signing)
+```
+
+Code signing for distribution requires environment variables:
+
+- macOS: `CSC_LINK`, `CSC_KEY_PASSWORD`, plus `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` for notarization.
+- Windows: `CSC_LINK` and `CSC_KEY_PASSWORD` for an Authenticode certificate.
 
 See [docs/implementation-checklist.md](docs/implementation-checklist.md) for the step-by-step build plan and [docs/psd-to-pdf-standalone-spec.md](docs/psd-to-pdf-standalone-spec.md) for the full specification.
 

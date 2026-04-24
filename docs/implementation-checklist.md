@@ -159,67 +159,66 @@
 - [ ] `start-merge` 핸들러 본 구현, `cancel-merge` 핸들러 본 구현
 
 ### 4.3 워커 본체 — 초기화
-- [ ] `initializeCanvas(createCanvas)` (ag-psd fallback 대비 — §3.8)
-- [ ] `sharp.concurrency(1)` (워커 내부 libvips 스레드 제한)
+- [x] `initializeCanvas(createCanvas)` (ag-psd fallback 대비 — §3.8)
+- [x] `sharp.concurrency(1)` (워커 내부 libvips 스레드 제한)
 
 ### 4.4 워커 본체 — PSD → RGBA
-- [ ] `extractRgba(psd)` 구현 (spec §8.4)
+- [x] `extractRgba(psd)` 구현 (spec §8.4)
   - 1순위 `psd.imageData`
   - 2순위 `psd.canvas.getContext('2d').getImageData`
   - 둘 다 없으면 throw → onError 정책에 따라 분기
-- [ ] `readPsd(buffer, { useImageData: true, skipLayerImageData: true, skipThumbnail: true })`
-- [ ] **반드시 Buffer 입력으로 sharp 사용** (`sharp(Buffer.from(rgba), { raw: { width, height, channels: 4 }, limitInputPixels: false })`) — §3.3 회피
+- [x] `readPsd(buffer, { useImageData: true, skipLayerImageData: true, skipThumbnail: true })`
+- [x] **반드시 Buffer 입력으로 sharp 사용** (`sharp(Buffer.from(rgba), { raw: { width, height, channels: 4 }, limitInputPixels: false })`) — §3.3 회피
 
 ### 4.5 워커 본체 — 리사이즈 / 인코딩
-- [ ] `computePageSize(width, height, opt)` 구현
-- [ ] `pageSize.mode === 'fixed-width'`이고 원본보다 작을 때 `withoutEnlargement` 옵션 처리
-- [ ] JPEG 분기: `.flatten({ background: '#ffffff' }).jpeg({ quality, mozjpeg: true })`
-- [ ] PNG 분기: `.png({ compressionLevel: 3 })`
+- [x] `computePageSize(width, height, opt)` 구현 (`src/shared/utils/page-size.ts`로 분리해 testable)
+- [x] `pageSize.mode === 'fixed-width'`이고 원본보다 작을 때 `withoutEnlargement` 옵션 처리
+- [x] JPEG 분기: `.flatten({ background: '#ffffff' }).jpeg({ quality, mozjpeg: true })`
+- [x] PNG 분기: `.png({ compressionLevel: 3 })`
 
 ### 4.6 워커 본체 — PDF 작성
-- [ ] `new PDFDocument({ autoFirstPage: false })` + `doc.pipe(fs.createWriteStream(outputPath))` (스트리밍 — §3.6)
-- [ ] 페이지 추가: `doc.addPage({ size: [w, h], margin: 0 })` → `doc.image(buf, 0, 0, { width, height })`
-- [ ] `pageGapPx > 0` 이면 빈 페이지 삽입
-- [ ] 루프 종료 후 `doc.end()` + `writeStream` close 대기
-- [ ] `try/finally`로 핸들 정리 (§3.11)
+- [x] `new PDFDocument({ autoFirstPage: false })` + `doc.pipe(fs.createWriteStream(outputPath))` (스트리밍 — §3.6)
+- [x] 페이지 추가: `doc.addPage({ size: [w, h], margin: 0 })` → `doc.image(buf, 0, 0, { width, height })`
+- [x] `pageGapPx > 0` 이면 빈 페이지 삽입
+- [x] 루프 종료 후 `doc.end()` + `writeStream` close 대기
+- [x] `try/finally`로 핸들 정리 (§3.11)
 
 ### 4.7 워커 본체 — 진행률 / 취소 / 에러
-- [ ] phase 별 `parentPort.postMessage` 시점:
-  - parse 시작 / encode 시작 / write 시작 / finalize / done
-- [ ] `parentPort.on('message')` 로 `cancel` 신호 처리 → `cancelRequested = true`
-- [ ] 취소 시: `doc.end()` → stream close → `fs.unlink(outputPath)` → `cancelled` 보고
-- [ ] `onError === 'skip'`: skipped 인덱스 누적 + 진행 계속
-- [ ] `onError === 'abort'`: throw 후 main 측에서 `error` phase 보고 + 부분 파일 삭제
+- [x] phase 별 `parentPort.postMessage` 시점: init / parse / encode / write / finalize / done / cancelled / error
+- [x] `parentPort.on('message')` 로 `cancel` 신호 처리 → `cancelRequested = true`
+- [x] 취소 시: `doc.end()` → stream close → `fs.unlink(outputPath)` → `MergeResult.cancelled: true` 로 보고
+- [x] `onError === 'skip'`: skipped 인덱스 누적 + 진행 계속
+- [x] `onError === 'abort'`: throw 후 main 측에서 `error` phase 보고 + 부분 파일 삭제
 
 ### 4.8 메모리 안정화
-- [ ] 한 이터레이션 변수를 `{ ... }` 블록 스코프에 가두기 (spec §8.6)
-- [ ] 이터레이션 사이 `await new Promise(r => setImmediate(r))` 삽입
-- [ ] 파일을 **순차적으로만** 처리 (병렬 금지 — §4.1.4)
+- [x] `processOne` 함수 스코프에 임시 변수 가둠 (spec §8.6 — 함수 종료 시 GC)
+- [x] 이터레이션 사이 `await new Promise(r => setImmediate(r))` 삽입
+- [x] 파일을 **순차적으로만** 처리 (병렬 금지 — §4.1.4)
 
 ---
 
 ## Phase 5 — UI: 진행률 / 취소 / 완료
 
 ### 5.1 ProgressOverlay
-- [ ] 풀스크린 모달 (배경 dim)
-- [ ] 진행률 바 + 퍼센트 (계산: `currentIndex / totalCount`)
-- [ ] "N개 중 K번째 처리 중", phase 한국어 라벨, 현재 파일명
-- [ ] 경과 시간 + 예상 남은 시간 (단순 선형 추정)
-- [ ] [취소] 버튼 → `window.api.cancelMerge(jobId)`
-- [ ] `onMergeProgress` 구독 → store 업데이트
+- [x] 풀스크린 모달 (배경 dim + backdrop blur)
+- [x] 진행률 바 + 퍼센트 (계산: `currentIndex / totalCount`)
+- [x] "N개 중 K번째 처리 중", phase 한국어 라벨, 현재 파일명
+- [x] 경과 시간 + 예상 남은 시간 (단순 선형 추정)
+- [x] [취소] 버튼 → `window.api.cancelMerge(jobId)`
+- [x] `onMergeProgress` 구독 → store 업데이트 (`useMergeProgressBridge` 훅)
 
 ### 5.2 CompletionCard
-- [ ] 페이지 수 / 파일 사이즈 / 경과 시간 표시
-- [ ] 스킵된 파일이 있으면 경고 라벨 (`F59E0B`)
-- [ ] 저장 경로 모노스페이스 표시
-- [ ] [PDF 열기] → `openPath`
-- [ ] [폴더에서 보기] → `showInFolder`
-- [ ] [처음으로] → store reset
+- [x] 페이지 수 / 파일 사이즈 / 경과 시간 표시
+- [x] 스킵된 파일이 있으면 경고 라벨 (`F59E0B`)
+- [x] 저장 경로 모노스페이스 표시
+- [x] [PDF 열기] → `openPath`
+- [x] [폴더에서 보기] → `showInFolder`
+- [x] [처음으로] → store reset
 
 ### 5.3 ErrorToast / CancelledToast
-- [ ] error phase → 빨간 토스트 + 메시지
-- [ ] cancelled phase → 중성 토스트 + "병합이 취소되었습니다"
-- [ ] 다음 시도 시 jobId 재생성 + 이전 상태 초기화 (spec §10 #14)
+- [x] error phase → 빨간 토스트 + 메시지 (ActionBar 처리)
+- [x] cancelled phase → 중성 토스트 + "병합이 취소되었습니다"
+- [x] 다음 시도 시 jobId 재생성 + 이전 상태 초기화 (spec §10 #14)
 
 ---
 
@@ -227,48 +226,52 @@
 
 > spec §10 매트릭스를 기준으로 항목 단위 검증.
 
-- [ ] #1 1개만 드롭 → 정상 추가 (1 PSD = 1 PDF 페이지도 유효한 결과 → spec §10 #1 강제는 제거)
-- [ ] #2 PSD가 아닌 파일 혼합 드롭 → 무시 + "N개 무시됨" 토스트
-- [ ] #3 동일 경로 중복 → 자동 dedupe
-- [ ] #4 접근 권한 없음 → 토스트 + 항목 경고
-- [ ] #5 손상된 PSD → onError 정책대로
-- [ ] #6 composite/layers 둘 다 없는 PSD → 스킵
-- [ ] #7 PSB 입력 → 시도 후 실패 시 "PSB 미지원" 안내
-- [ ] #8 디스크 공간 부족 → write error 캐치 + 부분 파일 삭제
-- [ ] #9 사용자 취소 → 부분 파일 삭제 (앞서 4.7에서 처리)
-- [ ] #10 저장 경로 덮어쓰기 → OS 다이얼로그에 위임 (별도 처리 불필요)
-- [ ] #11 긴 경로 / 특수문자 → 사전 검증
-- [ ] #12 워커 segfault → `worker.on('exit', code !== 0)` 감지 + 토스트
-- [ ] #13 결과 PDF > 4GB → 경고 토스트
-- [ ] #14 재시도 시 상태 초기화
-- [ ] #15 fixed-width인데 원본이 더 좁음 → withoutEnlargement (4.5에서 처리)
+- [x] #1 1개만 드롭 → 정상 추가 (1 PSD = 1 PDF 페이지도 유효한 결과 → spec §10 #1 강제는 제거)
+- [x] #2 PSD가 아닌 파일 혼합 드롭 → 무시 + "N개 무시됨" 토스트 (DropZone)
+- [x] #3 동일 경로 중복 → 자동 dedupe (mergeStore.dedupeAndSort)
+- [x] #4 접근 권한 없음 → statFiles는 size=null, 워커는 readFile 실패 → onError 정책
+- [x] #5 손상된 PSD → onError 정책대로 (워커 try/catch 분기)
+- [x] #6 composite/layers 둘 다 없는 PSD → extractRgba throw → 스킵/중단
+- [ ] #7 PSB 입력 → ag-psd가 일반 에러로 처리 (전용 안내는 v0.2 백로그)
+- [x] #8 디스크 공간 부족 → write error 캐치 + 부분 파일 삭제 (워커 finally)
+- [x] #9 사용자 취소 → 부분 파일 삭제 (4.7에서 처리)
+- [x] #10 저장 경로 덮어쓰기 → OS 다이얼로그에 위임 (별도 처리 불필요)
+- [ ] #11 긴 경로 / 특수문자 → 별도 사전 검증 없음 (OS-level 에러로 fall back, v0.2)
+- [x] #12 워커 segfault → `worker.on('exit', code !== 0)` 감지 + 안내 메시지 (orchestrator)
+- [x] #13 결과 PDF > 4GB → 경고 토스트 (CompletionCard)
+- [x] #14 재시도 시 상태 초기화 (resetSession)
+- [x] #15 fixed-width인데 원본이 더 좁음 → withoutEnlargement (4.5에서 처리)
 
 ---
 
-## Phase 7 — i18n (영어 / 한국어)
+## Phase 7 — i18n (영어 / 한국어) — **v0.2 백로그로 이동**
+
+> 사용자 한국어 선호 + UI 카피가 한국어로 박혀 있어 v0.1 단계에서는 의도적으로 미적용.
+> 영어 사용자 대응 필요 시 v0.2에서 `react-i18next` 또는 경량 자체 구현으로 도입.
 
 - [ ] `src/renderer/src/i18n/en.ts`, `ko.ts` 키 정의
-- [ ] 키 목록(spec §9.3): `emptyHint`, `minTwoFilesRequired`, `addFiles`, `embedFormat`, `qualityLabel`, `pageSizeAuto`, `pageSizeFixedWidth`, `errorStrategy`, `continueSkip`, `abort`, `startMerge`, `merging`, `progressHint`, `cancelButton`, `completed`, `pagesSuffix`, `skippedNotice`, `openPdf`, `showInFolder`, `startOver`, `toastError`, `toastCancelled`
 - [ ] OS 언어 자동 감지 → 한국어 우선
-- [ ] 언어 토글 (헤더) — 사용자 설정 영구 저장 (electron-store 또는 간단한 JSON)
+- [ ] 언어 토글 (헤더) — 사용자 설정 영구 저장
 
 ---
 
 ## Phase 8 — 테스트
 
 ### 8.1 단위 (Vitest)
-- [ ] `natural-sort` 10종 케이스
-- [ ] `format-bytes` 경계값
-- [ ] `computePageSize` (auto / fixed-width / 종횡비)
-- [ ] `extractRgba` (ag-psd `writePsd`로 합성 PSD → 파싱 → 바이트 검증)
+- [x] `natural-sort` (수치 비교, 자릿수, 대소문자, 빈 문자열 — 5 케이스)
+- [x] `format-bytes` (경계값, 소수점 옵션, 비정상 입력)
+- [x] `computePageSize` (auto / fixed-width / 종횡비 / withoutEnlargement / 라운딩)
+- [x] `path` (basenameFromPath, extensionOf — Unix/Windows/혼합)
+- [x] `format-duration` + `phaseLabel`
+- [ ] `extractRgba` (ag-psd `writePsd`로 합성 PSD → 파싱 → 바이트 검증) — v0.2
 
-### 8.2 통합 (Vitest, 임시 파일)
-- [ ] 워커 직접 spawn → 2~3개 합성 PSD 병합 → `pdfjs-dist`로 페이지 수 검증
+### 8.2 통합 (Vitest, 임시 파일) — **v0.2 백로그**
+- [ ] 워커 직접 spawn → 합성 PSD 병합 → `pdfjs-dist`로 페이지 수 검증
 - [ ] 너비 불일치 PSD 리사이즈 검증
 - [ ] 손상 PSD + skip 정책 → skipped 인덱스 검증
 - [ ] 취소 시그널 → 부분 파일 삭제 확인
 
-### 8.3 E2E (Playwright + Electron)
+### 8.3 E2E (Playwright + Electron) — **v0.2 백로그**
 - [ ] 드롭 → 병합 → 완료 골든패스
 - [ ] 취소 → idle 복귀
 - [ ] 혼합 드롭 필터링
@@ -286,16 +289,16 @@
 ## Phase 9 — 패키징 / 배포
 
 ### 9.1 electron-builder
-- [ ] `electron-builder` 설치 + `electron-builder.yml` 또는 `package.json#build`
-- [ ] `appId: com.realdraw.psd-to-pdf`, `productName`
-- [ ] `asarUnpack`: `node_modules/sharp/**`, `node_modules/@napi-rs/canvas/**`
-- [ ] mac dmg (x64 + arm64)
-- [ ] win nsis (x64)
-- [ ] linux AppImage (선택)
-- [ ] `build/icon.icns`, `build/icon.ico` 준비
+- [x] `electron-builder` 설치 + `electron-builder.yml`
+- [x] `appId: com.realdraw.psd-to-pdf`, `productName: "PSD to PDF"`
+- [x] `asarUnpack`: `node_modules/sharp/**`, `node_modules/@napi-rs/canvas/**`, `node_modules/@img/**`
+- [x] mac dmg (x64 + arm64) + dmg 레이아웃
+- [x] win nsis (x64) — 사용자 디렉터리 선택 허용
+- [x] linux AppImage (x64)
+- [ ] `build/icon.icns`, `build/icon.ico`, `build/icon.png` 디자인 후 배치 (수동)
 
-### 9.2 코드 서명
-- [ ] macOS: Developer ID 서명 + notarization (CI 시크릿)
+### 9.2 코드 서명 — **사용자 환경 의존**
+- [ ] macOS: Developer ID 서명 + notarization (CI 시크릿: `CSC_LINK`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`)
 - [ ] Windows: 인증서 있을 시 서명 / 없으면 SmartScreen 안내 README
 
 ### 9.3 첫 릴리스

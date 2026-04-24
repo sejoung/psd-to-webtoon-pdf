@@ -1,0 +1,70 @@
+appId: com.realdraw.psd-to-pdf
+productName: PSD to PDF
+copyright: Copyright © 2026 RealDraw
+
+directories:
+  output: release
+  buildResources: build
+
+# 빌드 산출물 + 런타임 의존성만 포함
+files:
+  - 'out/**/*'
+  - 'package.json'
+  - '!node_modules/**/{CHANGELOG.md,README.md,readme.md,changelog.md}'
+  - '!node_modules/**/{*.ts,*.tsx,*.map,test,tests,docs,doc,example,examples}'
+  - '!node_modules/**/.bin'
+  - '!**/{.eslintrc.cjs,.editorconfig,.prettierrc,.prettierignore,.npmignore,.gitignore,.gitattributes}'
+
+# §3.1, §3.2: 네이티브 모듈은 asar에서 풀어야 dlopen 가능
+asarUnpack:
+  - 'node_modules/sharp/**'
+  - 'node_modules/@napi-rs/canvas/**'
+  - 'node_modules/@img/**'
+
+mac:
+  category: public.app-category.graphics-design
+  icon: resources/icons/icon.icns
+  target:
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  # 서명/공증은 CI에서 환경변수로 (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID)
+  notarize: false
+
+dmg:
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+win:
+  icon: resources/icons/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+  deleteAppDataOnUninstall: false
+
+linux:
+  category: Graphics
+  icon: resources/icons/icon.png
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  artifactName: ${productName}-${version}.${ext}
+
+publish: null

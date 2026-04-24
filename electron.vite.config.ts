@@ -9,7 +9,10 @@ export default defineConfig({
     build: {
       outDir: 'out/main',
       rollupOptions: {
-        input: { index: resolve(__dirname, 'src/main/index.ts') }
+        input: {
+          index: resolve(__dirname, 'src/main/index.ts'),
+          'merge.worker': resolve(__dirname, 'src/main/workers/merge.worker.ts')
+        }
       }
     },
     resolve: {

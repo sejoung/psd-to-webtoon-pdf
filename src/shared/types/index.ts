@@ -60,6 +60,8 @@ export interface MergeResult {
   skippedIndices: number[]
   elapsedMs: number
   fileSizeBytes: number
+  /** 사용자 취소로 중도 종료된 결과인지. true면 outputPath는 삭제됨. */
+  cancelled?: boolean
 }
 
 export const DEFAULT_MERGE_OPTIONS: MergeOptions = {

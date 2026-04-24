@@ -2,12 +2,14 @@ import { FilePlus2, Inbox } from 'lucide-react'
 import { useCallback } from 'react'
 import { useFileDrop } from '../hooks/useFileDrop'
 import { makeFileEntry, useMergeStore } from '../stores/mergeStore'
+import { useToastStore } from '../stores/toastStore'
 
 const ALLOWED = ['psd'] as const
 
 export function DropZone() {
   const addFiles = useMergeStore((s) => s.addFiles)
   const fileCount = useMergeStore((s) => s.files.length)
+  const pushToast = useToastStore((s) => s.push)
 
   const ingestPaths = useCallback(
     async (paths: string[]) => {
@@ -18,9 +20,21 @@ export function DropZone() {
     [addFiles]
   )
 
+  const handleRejected = useCallback(
+    (count: number) => {
+      pushToast({
+        message: `PSD가 아닌 ${count}개 파일을 무시했습니다`,
+        variant: 'info',
+        durationMs: 3500
+      })
+    },
+    [pushToast]
+  )
+
   const { isOver, bind } = useFileDrop({
     onDrop: ingestPaths,
-    allowedExtensions: ALLOWED
+    allowedExtensions: ALLOWED,
+    onRejected: handleRejected
   })
 
   const handleClickAdd = useCallback(async () => {
