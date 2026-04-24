@@ -11,6 +11,11 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# JavaScript actions(checkout/setup-node/cache 등)을 Node 24로 강제.
+# Node 20 기반 action은 2026-09 EOL이라 deprecation 경고가 뜨므로 미리 옵트인.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   verify:
     name: Lint + Typecheck + Tests

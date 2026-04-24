@@ -17,6 +17,11 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+# JavaScript actions(checkout/setup-node/cache 등)을 Node 24로 강제.
+# Node 20 기반 action은 2026-09 EOL이라 deprecation 경고가 뜨므로 미리 옵트인.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 # `npm run release`(scripts/release.mjs)가 로컬에서 이미 verify(lint+typecheck+
 # unit+integration)를 돌렸기 때문에, 이 워크플로우는 OS별 native build와
 # 패키징만 담당. 테스트 재실행 없음 — 빠른 릴리즈를 위해.
