@@ -1,6 +1,6 @@
 {
   "name": "psd-to-webtoon-pdf",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "description": "Convert multiple PSD files into a continuous PDF for easy review.",
   "license": "Apache-2.0",
